@@ -1,71 +1,49 @@
-# 🌲 BST Visualizer — Árvore Binária de Busca
+# BST Visualizer — Árvore Binária de Busca
 
-Visualizador gráfico de Árvore Binária de Busca em **Java + Swing** com arquitetura orientada a objetos.
+Visualizador gráfico de Árvore Binária de Busca em **Java + Swing**, com interface dark no estilo Vercel + Glassmorphism e arquitetura orientada a objetos.
 
 ---
 
-## 📁 Estrutura de Arquivos
+## Estrutura do Projeto
 
 ```
 bst-project/
 ├── src/
-│   ├── Main.java                          ← Ponto de entrada
+│   ├── Main.java
 │   └── bst/
 │       ├── theme/
 │       │   └── Theme.java                 ← Tokens de design (cores, fontes)
 │       ├── observer/
 │       │   └── BSTObserver.java           ← Interface do padrão Observer
 │       ├── model/
-│       │   ├── BSTNode.java               ← Nó da árvore (dados)
-│       │   └── BST.java                   ← Estrutura BST + notificação
+│       │   ├── BSTNode.java               ← Nó da árvore
+│       │   ├── BST.java                   ← Estrutura BST + notificação
+│       │   └── BSTAnalyzer.java           ← Métricas e análises
 │       ├── controller/
 │       │   └── BSTController.java         ← Mediador UI ↔ Modelo
+│       ├── io/
+│       │   ├── TreeFileWriter.java        ← Serialização e gravação TXT
+│       │   └── TreeFileReader.java        ← Leitura e reconstrução da árvore
 │       ├── renderer/
-│       │   └── TreeRenderer.java          ← Toda lógica Graphics2D
+│       │   └── TreeRenderer.java          ← Lógica de desenho Graphics2D
 │       └── ui/
-│           ├── BSTVisualizer.java         ← JFrame principal (orquestrador)
+│           ├── BSTVisualizer.java         ← JFrame principal
 │           └── panels/
 │               ├── HeaderPanel.java       ← Cabeçalho + estatísticas
-│               ├── ControlPanel.java      ← Botões + campo de entrada
+│               ├── ControlPanel.java      ← Botões e campo de entrada
 │               ├── TreePanel.java         ← Canvas de renderização
+│               ├── InfoPanel.java         ← Painel lateral de análise
 │               └── TraversalPanel.java    ← Rodapé com resultado de percurso
-├── compile.sh   / compile.bat
-├── run.sh       / run.bat
+├── compile.sh / compile.bat
+├── run.sh     / run.bat
 └── README.md
 ```
 
 ---
 
-## 🏗️ Arquitetura e Padrões de Projeto
+## Como Executar
 
-| Padrão         | Onde é aplicado                                          |
-|----------------|----------------------------------------------------------|
-| **Observer**   | `BST` notifica `HeaderPanel`, `TreePanel`, `TraversalPanel` automaticamente |
-| **MVC**        | `BST` (Model) · `BSTVisualizer` (View/Controller) · `BSTController` (Controller) |
-| **Facade**     | `BSTVisualizer` orquestra todos os componentes           |
-| **Strategy**   | `TreeRenderer` separa o algoritmo de desenho dos Swing components |
-| **Mediator**   | `BSTController` medeia UI → Modelo com resultados tipados |
-
-### Fluxo de dados
-
-```
-Usuário digita valor
-       ↓
-  ControlPanel
-       ↓ chama
-  BSTController.insert(rawInput)
-       ↓ valida e chama
-  BST.insert(val)
-       ↓ notifica observers
-  ┌────┴──────────────┬─────────────────┐
-  ▼                   ▼                 ▼
-HeaderPanel      TreePanel       TraversalPanel
-(atualiza stats) (redesenha)     (reseta percurso)
-```
-
----
-
-## ▶️ Como Executar
+**Requisito:** Java 17+
 
 ### Linux / macOS
 ```bash
@@ -81,85 +59,74 @@ run.bat
 
 ### Manualmente
 ```bash
-# Compilar
 javac -d out $(find src -name "*.java")
-
-# Executar
 java -cp out Main
 ```
 
-> **Requisito:** Java 17+ (usa `switch` com `->`)
+---
+
+## Funcionalidades
+
+| Função | Descrição |
+|---|---|
+| Inserir | Insere um valor seguindo as regras da BST, sem duplicatas |
+| Remover | Remove com tratamento dos 3 casos (folha, 1 filho, 2 filhos) |
+| Limpar | Apaga toda a árvore |
+| Em-Ordem | Esq → Raiz → Dir (resultado sempre ordenado) |
+| Pré-Ordem | Raiz → Esq → Dir |
+| Pós-Ordem | Esq → Dir → Raiz |
+| Por Nível | BFS — nível por nível |
+| Clique no nó | Seleciona o nó e exibe detalhes no painel lateral |
+| Salvar | Exporta a árvore em TXT no formato Parênteses Aninhados |
+| Carregar | Reconstrói a árvore a partir de um TXT salvo |
 
 ---
 
-## 🎮 Funcionalidades
+## Painel de Análise (lateral direito)
 
-| Função         | Descrição                                           |
-|----------------|-----------------------------------------------------|
-| **Inserir**    | Insere um valor seguindo as regras da BST (sem duplicatas) |
-| **Remover**    | Remove com tratamento dos 3 casos (folha, 1 filho, 2 filhos) |
-| **Limpar**     | Apaga toda a árvore                                 |
-| **In-Order**   | Percurso Esq → Raiz → Dir (resultado sempre ordenado) |
-| **Pre-Order**  | Percurso Raiz → Esq → Dir                          |
-| **Post-Order** | Percurso Esq → Dir → Raiz                          |
-| **Level-Order**| BFS — nível por nível                               |
-| **Clique**     | Clique em qualquer nó para selecioná-lo             |
+Atualizado em tempo real conforme a árvore muda.
+
+| Seção | Conteúdo |
+|---|---|
+| Propriedades | Total de nós, folhas, internos, raiz, altura, profundidade máxima, níveis |
+| Tipos da Árvore | Cheia, Completa, Perfeita, Balanceada, Degenerada |
+| Nó Selecionado | Nível, profundidade, altura, filhos, caminho da raiz |
+| Caminhos Raiz → Folha | Todos os caminhos listados |
 
 ---
 
-## 📐 Regras da BST implementadas
+## Definições Implementadas
 
-- **Inserção**: valores menores vão para a subárvore esquerda, maiores para a direita
-- **Busca por duplicata**: rejeita valores já existentes
-- **Remoção com sucessor in-order**: ao remover um nó com dois filhos, substitui pelo menor valor da subárvore direita
-- **Layout visual**: posição X calculada via índice in-order (garante sem sobreposição)
+| Conceito | Definição |
+|---|---|
+| Nível do nó | Raiz = 1. Fórmula: profundidade + 1 |
+| Profundidade do nó | Número de arestas até a raiz. Raiz = 0 |
+| Altura do nó | Número de arestas até a folha mais distante. Folha = 0 |
+| Altura da árvore | Altura da raiz. Árvore vazia = -1, só raiz = 0 |
+| Árvore Cheia | Todo nó tem 0 ou 2 filhos |
+| Árvore Completa | Todos os níveis preenchidos exceto o último (esq → dir) |
+| Árvore Perfeita | Todos os nós internos com 2 filhos e folhas no mesmo nível |
+| Árvore Balanceada | \|h(esq) − h(dir)\| ≤ 1 para todo nó |
+| Árvore Degenerada | Cada nó tem no máximo 1 filho |
 
 ---
 
-## 🆕 Funcionalidades Adicionadas
+## Formato de Arquivo (Parênteses Aninhados)
 
-### 💾 Salvar em TXT (Parênteses Aninhados)
-Clique em **SALVAR** para exportar a árvore. O arquivo gerado contém:
-- Parênteses Aninhados compacto e indentado
-- Estatísticas completas
-- Tipos da árvore
-- Todos os 4 percursos
-- Todos os caminhos Raiz→Folha
-- Tabela detalhada por nó
-
-**Exemplo de formato:**
 ```
 (50 (30 (20 () ()) (40 () ())) (70 (60 () ()) (80 () ())))
 ```
 
-### 📊 Painel InfoPanel (lateral direito)
-Exibe em tempo real:
+O arquivo TXT gerado pelo **Salvar** inclui além da expressão: estatísticas completas, tipos da árvore, os 4 percursos e todos os caminhos raiz → folha.
 
-| Seção | Conteúdo |
+---
+
+## Arquitetura e Padrões de Projeto
+
+| Padrão | Onde é aplicado |
 |---|---|
-| **Propriedades** | Total de nós, folhas, internos, raiz, altura, profundidade, níveis |
-| **Tipos** | Cheia ✓/✗, Completa ✓/✗, Perfeita ✓/✗, Balanceada ✓/✗, Degenerada ✓/✗ |
-| **Nó Selecionado** | Nível, profundidade, altura, filhos, caminho da raiz |
-| **Caminhos R→F** | Todos os caminhos raiz → folha |
-
-### 📐 Definições implementadas
-
-| Conceito | Definição |
-|---|---|
-| **Nível do nó** | Distância da raiz (raiz = nível 1) |
-| **Profundidade do nó** | Número de arestas até a raiz (raiz = 0) |
-| **Altura do nó** | Número de arestas até a folha mais distante (folha = 0) |
-| **Altura da árvore** | Altura da raiz |
-| **Profundidade máx.** | Maior profundidade entre todas as folhas |
-| **Árvore Cheia** | Todo nó tem 0 ou 2 filhos |
-| **Árvore Completa** | Todos os níveis preenchidos exceto último (esq→dir) |
-| **Árvore Perfeita** | Full + Complete + todas as folhas no mesmo nível |
-| **Árvore Balanceada** | \|h(esq) − h(dir)\| ≤ 1 para todo nó |
-| **Árvore Degenerada** | Cada nó tem no máximo 1 filho |
-
-### 📁 Novos arquivos
-```
-src/bst/model/BSTAnalyzer.java   ← Todas as análises e métricas
-src/bst/io/TreeFileWriter.java   ← Serialização e gravação em TXT
-src/bst/ui/panels/InfoPanel.java ← Painel lateral de informações
-```
+| Observer | `BST` notifica todos os painéis automaticamente a cada mudança |
+| MVC | `BST` (Model) · `BSTVisualizer` (View) · `BSTController` (Controller) |
+| Strategy | `TreeRenderer` separa o algoritmo de desenho dos componentes Swing |
+| Mediator | `BSTController` medeia UI → Modelo com resultados tipados |
+| Facade | `BSTVisualizer` orquestra todos os painéis e serviços |
