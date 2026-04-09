@@ -1,7 +1,6 @@
 package bst.model;
 
 import bst.observer.BSTObserver;
-
 import java.util.*;
 
 /**
@@ -135,6 +134,24 @@ public class BST {
     public void clear() {
         root = null;
         notifyChanged();
+    }
+
+    /**
+     * Inverte a árvore espelhando todos os nós recursivamente:
+     * o filho esquerdo de cada nó troca com o filho direito.
+     */
+    public void mirror() {
+        mirror(root);
+        notifyChanged();
+    }
+
+    private void mirror(BSTNode node) {
+        if (node == null) return;
+        BSTNode tmp  = node.left;
+        node.left    = node.right;
+        node.right   = tmp;
+        mirror(node.left);
+        mirror(node.right);
     }
 
     // ── Estatísticas ─────────────────────────────────────────────────────────

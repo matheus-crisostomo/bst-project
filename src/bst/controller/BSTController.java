@@ -83,6 +83,13 @@ public class BSTController {
         bst.clear();
     }
 
+    /**
+     * Espelha a árvore: troca filhos esquerdo e direito em todos os nós.
+     */
+    public void mirror() {
+        bst.mirror();
+    }
+
     /** Retorna a referência ao modelo BST (somente leitura recomendada). */
     public BST getBst() {
         return bst;

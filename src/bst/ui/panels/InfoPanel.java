@@ -5,11 +5,10 @@ import bst.model.BSTAnalyzer;
 import bst.model.BSTNode;
 import bst.observer.BSTObserver;
 import bst.theme.Theme;
-
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public class InfoPanel extends JPanel implements BSTObserver {
 
@@ -21,7 +20,7 @@ public class InfoPanel extends JPanel implements BSTObserver {
 
     // Properties
     private JLabel lblNodes, lblLeaves, lblInternal, lblRoot;
-    private JLabel lblHeight, lblDepth, lblLevels;
+    private JLabel lblHeight, lblDepth, lblLevels, lblTreeDepth;
 
     // Types
     private JLabel lblFull, lblComplete, lblPerfect, lblBalanced, lblDegen;
@@ -148,9 +147,10 @@ public class InfoPanel extends JPanel implements BSTObserver {
         lblInternal = cardRow("Nós Internos",    "—");
         lblRoot     = cardRow("Raiz",            "—");
         cardDivider();
-        lblHeight   = cardRow("Altura",          "—");
-        lblDepth    = cardRow("Prof. Máxima",    "—");
-        lblLevels   = cardRow("Níveis",          "—");
+        lblHeight    = cardRow("Altura",            "—");
+        lblTreeDepth = cardRow("Profundidade",   "—");
+        lblDepth     = cardRow("Prof. Máxima",   "—");
+        lblLevels    = cardRow("Níveis",         "—");
     }
 
     private void buildTypesRows() {
@@ -219,16 +219,17 @@ public class InfoPanel extends JPanel implements BSTObserver {
         if (root == null) {
             setText(lblNodes, "—"); setText(lblLeaves, "—");
             setText(lblInternal, "—"); setText(lblRoot, "—");
-            setText(lblHeight, "—"); setText(lblDepth, "—"); setText(lblLevels, "—");
+            setText(lblHeight, "—"); setText(lblDepth, "—"); setText(lblLevels, "—"); setText(lblTreeDepth, "—");
         } else {
             setText(lblNodes,    String.valueOf(analyzer.countNodes(root)));
             setText(lblLeaves,   String.valueOf(analyzer.countLeaves(root)));
             setText(lblInternal, String.valueOf(analyzer.countInternalNodes(root)));
             setText(lblRoot,     String.valueOf(root.val));
             int h = analyzer.getTreeHeight(root);
-            setText(lblHeight, h + " aresta(s)");
-            setText(lblDepth,  h + " aresta(s)");
-            setText(lblLevels, String.valueOf(analyzer.getTreeLevels(root)));
+            setText(lblHeight,    h + " aresta(s)");
+            setText(lblTreeDepth, analyzer.getTreeMaxDepth(root) + " nível(is)");
+            setText(lblDepth,     h + " aresta(s)");
+            setText(lblLevels,    String.valueOf(analyzer.getTreeLevels(root)));
         }
     }
 

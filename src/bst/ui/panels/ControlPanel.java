@@ -4,13 +4,12 @@ import bst.controller.BSTController;
 import bst.controller.BSTController.InsertResult;
 import bst.controller.BSTController.RemoveResult;
 import bst.theme.Theme;
-
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public class ControlPanel extends JPanel {
 
@@ -45,11 +44,13 @@ public class ControlPanel extends JPanel {
         JButton btnInsert = buildPrimaryBtn("Inserir");
         JButton btnRemove = buildGhostBtn("Remover");
         JButton btnClear  = buildGhostBtn("Limpar");
+        JButton btnMirror = buildGhostBtn("Espelhar");
 
         add(inputField);
         add(btnInsert);
         add(btnRemove);
         add(btnClear);
+        add(btnMirror);
         add(buildDivider());
 
         JLabel fileLabel = new JLabel("Arquivo");
@@ -76,6 +77,7 @@ public class ControlPanel extends JPanel {
         btnInsert.addActionListener(e -> doInsert());
         btnRemove.addActionListener(e -> doRemove());
         btnClear.addActionListener(e  -> doClear());
+        btnMirror.addActionListener(e -> doMirror());
         btnSave.addActionListener(e   -> saveCallback.run());
         btnLoad.addActionListener(e   -> loadCallback.run());
 
@@ -110,6 +112,11 @@ public class ControlPanel extends JPanel {
         controller.clear();
         inputField.setText(""); inputField.requestFocus();
         toastCallback.accept("Árvore limpa", "info");
+    }
+
+    private void doMirror() {
+        controller.mirror();
+        toastCallback.accept("Árvore espelhada", "info");
     }
 
     // ── Componentes ──────────────────────────────────────────────────────────
