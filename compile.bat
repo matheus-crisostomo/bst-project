@@ -13,7 +13,7 @@ mkdir out
 
 REM Coleta todos os arquivos .java e compila
 for /r src %%f in (*.java) do echo %%f >> sources.txt
-javac -d out @sources.txt
+javac -sourcepath src -d out @sources.txt
 del sources.txt
 
 if %errorlevel% == 0 (
