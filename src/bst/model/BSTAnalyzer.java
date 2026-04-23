@@ -130,13 +130,19 @@ public class BSTAnalyzer {
     /**
      * Árvore CHEIA (Full / Strictly Binary):
      * Todo nó tem exatamente 0 ou 2 filhos.
+     * Árvore vazia NÃO é considerada cheia.
      */
     public boolean isFull(BSTNode root) {
-        if (root == null) return true;
-        boolean isLeaf  = root.left == null && root.right == null;
-        boolean hasBoth = root.left != null && root.right != null;
+        if (root == null) return false;
+        return isFullRec(root);
+    }
+
+    private boolean isFullRec(BSTNode node) {
+        if (node == null) return true;
+        boolean isLeaf  = node.left == null && node.right == null;
+        boolean hasBoth = node.left != null && node.right != null;
         if (!isLeaf && !hasBoth) return false;
-        return isFull(root.left) && isFull(root.right);
+        return isFullRec(node.left) && isFullRec(node.right);
     }
 
     /**
@@ -197,24 +203,31 @@ public class BSTAnalyzer {
     /**
      * Árvore DEGENERADA (Degenerate / Pathological):
      * Cada nó tem no máximo 1 filho — degenerada em lista encadeada.
+     * Requer pelo menos 2 nós (um único nó raiz não é degenerado).
      */
     public boolean isDegenerate(BSTNode root) {
-        if (root == null) return true;
-        if (root.left != null && root.right != null) return false;
-        BSTNode child = root.left != null ? root.left : root.right;
-        return isDegenerate(child);
+        if (root == null) return false;
+        if (countNodes(root) < 2) return false;
+        return isDegenerateRec(root);
+    }
+
+    private boolean isDegenerateRec(BSTNode node) {
+        if (node == null) return true;
+        if (node.left != null && node.right != null) return false;
+        BSTNode child = node.left != null ? node.left : node.right;
+        return isDegenerateRec(child);
     }
 
     /** Retorna lista de tipos aplicáveis. Uma árvore pode satisfazer múltiplos. */
     public List<String> getTreeTypes(BSTNode root) {
         if (root == null) return List.of("Vazia");
         List<String> types = new ArrayList<>();
-        if (isPerfect(root))                                        types.add("Perfeita");
-        if (isComplete(root))                                       types.add("Completa");
-        if (isFull(root))                                           types.add("Cheia (Full)");
-        if (isBalanced(root))                                       types.add("Balanceada");
-        if (isDegenerate(root) && countNodes(root) > 1)             types.add("Degenerada");
-        if (types.isEmpty())                                        types.add("BST Padrão");
+        if (isPerfect(root))     types.add("Perfeita");
+        if (isComplete(root))    types.add("Completa");
+        if (isFull(root))        types.add("Cheia (Full)");
+        if (isBalanced(root))    types.add("Balanceada");
+        if (isDegenerate(root))  types.add("Degenerada");
+        if (types.isEmpty())     types.add("BST Padrão");
         return Collections.unmodifiableList(types);
     }
 

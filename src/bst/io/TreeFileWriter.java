@@ -3,7 +3,6 @@ package bst.io;
 import bst.model.BST;
 import bst.model.BSTAnalyzer;
 import bst.model.BSTNode;
-
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -154,8 +153,7 @@ public class TreeFileWriter {
         sb.append(typeRow("Completa (Complete)",    analyzer.isComplete(root)));
         sb.append(typeRow("Perfeita (Perfect)",     analyzer.isPerfect(root)));
         sb.append(typeRow("Balanceada (Balanced)",  analyzer.isBalanced(root)));
-        sb.append(typeRow("Degenerada (Degenerate)",analyzer.isDegenerate(root)
-                          && analyzer.countNodes(root) > 1));
+        sb.append(typeRow("Degenerada (Degenerate)",analyzer.isDegenerate(root)));
         sb.append("\n");
 
         // ── 5. Percursos ──────────────────────────────────────

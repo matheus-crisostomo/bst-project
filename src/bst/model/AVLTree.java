@@ -112,6 +112,28 @@ public class AVLTree extends BST {
         return (n == null) ? 0 : height(n.left) - height(n.right);
     }
 
+    // ── Mirror ───────────────────────────────────────────────────────────────
+
+    /**
+     * Espelha a árvore e rebalanceia completamente via reinserção,
+     * pois o espelhamento simples destrói a propriedade AVL.
+     */
+    @Override
+    public void mirror() {
+        java.util.List<Integer> vals = new java.util.ArrayList<>();
+        collectMirrorPreorder(root, vals);
+        root = null;
+        for (int v : vals) root = insertAVL(root, v);
+        notifyChanged();
+    }
+
+    private void collectMirrorPreorder(BSTNode node, java.util.List<Integer> vals) {
+        if (node == null) return;
+        vals.add(node.val);
+        collectMirrorPreorder(node.right, vals);
+        collectMirrorPreorder(node.left,  vals);
+    }
+
     // ── Utilitários ──────────────────────────────────────────────────────────
 
     private boolean contains(BSTNode node, int val) {
