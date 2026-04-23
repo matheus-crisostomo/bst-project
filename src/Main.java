@@ -1,5 +1,5 @@
 import bst.ui.BSTVisualizer;
-
+import bst.ui.TreeTypeDialog;
 import javax.swing.*;
 
 /**
@@ -33,6 +33,14 @@ public class Main {
         }
 
         // Toda criação de UI deve ocorrer na Event Dispatch Thread (EDT)
-        SwingUtilities.invokeLater(BSTVisualizer::new);
+        SwingUtilities.invokeLater(() -> {
+            TreeTypeDialog dialog = new TreeTypeDialog();
+            dialog.setVisible(true);
+
+            TreeTypeDialog.TreeType type = dialog.getSelectedType();
+            if (type == null) System.exit(0); // fechou sem escolher
+
+            new BSTVisualizer(type);
+        });
     }
 }

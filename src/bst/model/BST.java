@@ -32,9 +32,9 @@ public class BST {
         observers.remove(observer);
     }
 
-    private void notifyChanged()         { observers.forEach(BSTObserver::onTreeChanged);         }
-    private void notifyInserted(int val) { observers.forEach(o -> o.onNodeInserted(val));         }
-    private void notifyRemoved(int val)  { observers.forEach(o -> o.onNodeRemoved(val));          }
+    protected void notifyChanged()         { observers.forEach(BSTObserver::onTreeChanged);       }
+    protected void notifyInserted(int val) { observers.forEach(o -> o.onNodeInserted(val));       }
+    protected void notifyRemoved(int val)  { observers.forEach(o -> o.onNodeRemoved(val));        }
 
     // ── Operações Mutáveis ───────────────────────────────────────────────────
 
