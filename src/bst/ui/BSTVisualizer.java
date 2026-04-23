@@ -3,18 +3,18 @@ package bst.ui;
 import bst.controller.BSTController;
 import bst.io.TreeFileReader;
 import bst.io.TreeFileWriter;
+import bst.model.AVLTree;
 import bst.model.BST;
 import bst.model.BSTAnalyzer;
 import bst.renderer.TreeRenderer;
 import bst.theme.Theme;
+import bst.ui.TreeTypeDialog.TreeType;
 import bst.ui.panels.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class BSTVisualizer extends JFrame {
 
@@ -34,10 +34,10 @@ public class BSTVisualizer extends JFrame {
     private JLabel toastLabel;
     private Timer  toastTimer;
 
-    public BSTVisualizer() {
-        super("BST Visualizer");
+    public BSTVisualizer(TreeType treeType) {
+        super(treeType == TreeType.AVL ? "AVL Visualizer" : "BST Visualizer");
 
-        bst        = new BST();
+        bst        = treeType == TreeType.AVL ? new AVLTree() : new BST();
         controller = new BSTController(bst);
         analyzer   = new BSTAnalyzer();
         renderer   = new TreeRenderer();
@@ -45,7 +45,7 @@ public class BSTVisualizer extends JFrame {
         fileReader = new TreeFileReader();
 
         configureFrame();
-        buildPanels();
+        buildPanels(treeType);
         wirePanels();
         registerObservers();
 
@@ -63,8 +63,8 @@ public class BSTVisualizer extends JFrame {
         setContentPane(root);
     }
 
-    private void buildPanels() {
-        headerPanel    = new HeaderPanel(bst);
+    private void buildPanels(TreeType treeType) {
+        headerPanel    = new HeaderPanel(bst, treeType);
         controlPanel   = new ControlPanel(controller);
         treePanel      = new TreePanel(bst, renderer);
         infoPanel      = new InfoPanel(bst, analyzer);
@@ -91,6 +91,17 @@ public class BSTVisualizer extends JFrame {
 
     private void wirePanels() {
         controlPanel.setToastCallback(this::showToast);
+
+        controlPanel.setSwitchTypeCallback(() -> {
+            dispose();
+            SwingUtilities.invokeLater(() -> {
+                TreeTypeDialog dialog = new TreeTypeDialog();
+                dialog.setVisible(true);
+                TreeTypeDialog.TreeType type = dialog.getSelectedType();
+                if (type == null) System.exit(0);
+                new BSTVisualizer(type);
+            });
+        });
 
         controlPanel.setTraversalCallback(type -> {
             if (bst.root == null) { showToast("Árvore está vazia", "error"); return; }

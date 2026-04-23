@@ -3,20 +3,22 @@ package bst.ui.panels;
 import bst.model.BST;
 import bst.observer.BSTObserver;
 import bst.theme.Theme;
-
+import bst.ui.TreeTypeDialog.TreeType;
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import java.awt.*;
 
 public class HeaderPanel extends JPanel implements BSTObserver {
 
-    private final BST    bst;
+    private final BST      bst;
+    private final TreeType treeType;
     private       JLabel statNodesVal;
     private       JLabel statHeightVal;
     private       JLabel statRootVal;
 
-    public HeaderPanel(BST bst) {
-        this.bst = bst;
+    public HeaderPanel(BST bst, TreeType treeType) {
+        this.bst      = bst;
+        this.treeType = treeType;
         setBackground(Theme.BG_PANEL);
         setBorder(new MatteBorder(0, 0, 1, 0, Theme.BORDER));
         setPreferredSize(new Dimension(0, 60));
@@ -71,15 +73,18 @@ public class HeaderPanel extends JPanel implements BSTObserver {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         p.setOpaque(false);
 
-        JLabel bst = new JLabel("BST");
-        bst.setFont(Theme.ui(Font.BOLD, 15));
-        bst.setForeground(Theme.TEXT_BRIGHT);
+        String typeLabel = treeType == TreeType.AVL ? "AVL" : "BST";
+        Color  typeColor = treeType == TreeType.AVL ? Theme.ACCENT_GREEN : Theme.ACCENT_CYAN;
+
+        JLabel typeTag = new JLabel(typeLabel);
+        typeTag.setFont(Theme.ui(Font.BOLD, 15));
+        typeTag.setForeground(typeColor);
 
         JLabel viz = new JLabel("Visualizador");
         viz.setFont(Theme.ui(Font.PLAIN, 15));
         viz.setForeground(Theme.TEXT_MUTED);
 
-        p.add(bst);
+        p.add(typeTag);
         p.add(viz);
         return p;
     }
