@@ -16,10 +16,11 @@ public class ControlPanel extends JPanel {
     private final BSTController controller;
     private JTextField inputField;
 
-    private BiConsumer<String, String> toastCallback     = (m, t) -> {};
-    private Consumer<String>           traversalCallback = t -> {};
-    private Runnable                   saveCallback      = () -> {};
-    private Runnable                   loadCallback      = () -> {};
+    private BiConsumer<String, String> toastCallback      = (m, t) -> {};
+    private Consumer<String>           traversalCallback  = t -> {};
+    private Runnable                   saveCallback       = () -> {};
+    private Runnable                   loadCallback       = () -> {};
+    private Runnable                   switchTypeCallback = () -> {};
 
     public ControlPanel(BSTController controller) {
         this.controller = controller;
@@ -29,10 +30,11 @@ public class ControlPanel extends JPanel {
         buildComponents();
     }
 
-    public void setToastCallback(BiConsumer<String, String> cb)  { this.toastCallback     = cb; }
-    public void setTraversalCallback(Consumer<String>       cb)  { this.traversalCallback = cb; }
-    public void setSaveCallback(Runnable                    cb)  { this.saveCallback      = cb; }
-    public void setLoadCallback(Runnable                    cb)  { this.loadCallback      = cb; }
+    public void setToastCallback(BiConsumer<String, String> cb)  { this.toastCallback      = cb; }
+    public void setTraversalCallback(Consumer<String>       cb)  { this.traversalCallback  = cb; }
+    public void setSaveCallback(Runnable                    cb)  { this.saveCallback       = cb; }
+    public void setLoadCallback(Runnable                    cb)  { this.loadCallback       = cb; }
+    public void setSwitchTypeCallback(Runnable              cb)  { this.switchTypeCallback = cb; }
 
     public void setInputValue(String val) {
         SwingUtilities.invokeLater(() -> inputField.setText(val));
@@ -41,11 +43,17 @@ public class ControlPanel extends JPanel {
     private void buildComponents() {
         inputField = buildInputField();
 
+        JButton btnSwitch = buildGhostBtn("← Trocar Tipo");
+        btnSwitch.setForeground(Theme.TEXT_MUTED);
+        btnSwitch.setFont(Theme.ui(Font.PLAIN, 12));
+
         JButton btnInsert = buildPrimaryBtn("Inserir");
         JButton btnRemove = buildGhostBtn("Remover");
         JButton btnClear  = buildGhostBtn("Limpar");
         JButton btnMirror = buildGhostBtn("Espelhar");
 
+        add(btnSwitch);
+        add(buildDivider());
         add(inputField);
         add(btnInsert);
         add(btnRemove);
@@ -80,6 +88,7 @@ public class ControlPanel extends JPanel {
         btnMirror.addActionListener(e -> doMirror());
         btnSave.addActionListener(e   -> saveCallback.run());
         btnLoad.addActionListener(e   -> loadCallback.run());
+        btnSwitch.addActionListener(e -> switchTypeCallback.run());
 
         inputField.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed(KeyEvent e) {
