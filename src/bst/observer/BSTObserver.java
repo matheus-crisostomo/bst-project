@@ -1,5 +1,7 @@
 package bst.observer;
 
+import bst.model.RotationType;
+
 /**
  * ╔══════════════════════════════════════════════════════╗
  *   BSTObserver — Interface do padrão Observer
@@ -30,4 +32,13 @@ public interface BSTObserver {
      * @param val valor do nó removido
      */
     void onNodeRemoved(int val);
+
+    /**
+     * Chamado quando uma rotação AVL é executada durante o balanceamento.
+     * Implementação padrão vazia para observers que não precisam reagir.
+     *
+     * @param type tipo da rotação realizada
+     * @param pivotVal valor do nó pivô da rotação
+     */
+    default void onRotation(RotationType type, int pivotVal) {}
 }

@@ -1,14 +1,15 @@
 package bst.ui.panels;
 
 import bst.model.BST;
+import bst.model.RotationType;
 import bst.observer.BSTObserver;
 import bst.renderer.TreeRenderer;
 import bst.theme.Theme;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import javax.swing.*;
 
 /**
  * ╔══════════════════════════════════════════════════════╗
@@ -28,6 +29,14 @@ public class TreePanel extends JPanel implements BSTObserver {
     /** Callback chamado quando o usuário clica em um nó. */
     private Consumer<Integer> onNodeSelected = val -> {};
 
+    /** Callback para exibir toast com informação da rotação. */
+    private BiConsumer<String, String> rotationToastCallback = (m, t) -> {};
+
+    /** Timer da animação de rotação. */
+    private Timer rotationAnimTimer;
+    private static final int ROTATION_ANIM_DURATION_MS = 900;
+    private static final int ROTATION_ANIM_FPS = 40;
+
     public TreePanel(BST bst, TreeRenderer renderer) {
         this.bst      = bst;
         this.renderer = renderer;
@@ -46,6 +55,15 @@ public class TreePanel extends JPanel implements BSTObserver {
      */
     public void setOnNodeSelected(Consumer<Integer> cb) {
         this.onNodeSelected = cb;
+    }
+
+    /**
+     * Define o callback para exibir toast com informação da rotação.
+     *
+     * @param cb BiConsumer(mensagem, tipo)
+     */
+    public void setRotationToastCallback(BiConsumer<String, String> cb) {
+        this.rotationToastCallback = cb;
     }
 
     // ── Renderização ─────────────────────────────────────────────────────────
@@ -111,5 +129,44 @@ public class TreePanel extends JPanel implements BSTObserver {
     @Override
     public void onNodeRemoved(int val) {
         renderer.clearHighlight();
+    }
+
+    @Override
+    public void onRotation(RotationType type, int pivotVal) {
+        SwingUtilities.invokeLater(() -> {
+            // Determina direção do arco baseado no tipo de rotação
+            boolean clockwise = (type == RotationType.LEFT_LEFT || type == RotationType.RIGHT_LEFT);
+
+            renderer.startRotationAnimation(pivotVal, type.getShortName(), clockwise);
+
+            // Exibe toast com descrição da rotação
+            rotationToastCallback.accept(type.getDescription() + " no nó " + pivotVal, "info");
+
+            // Animação com timer
+            if (rotationAnimTimer != null && rotationAnimTimer.isRunning()) {
+                rotationAnimTimer.stop();
+                renderer.clearRotationAnimation();
+            }
+
+            long startTime = System.currentTimeMillis();
+            int interval = 1000 / ROTATION_ANIM_FPS;
+
+            rotationAnimTimer = new Timer(interval, e -> {
+                long elapsed = System.currentTimeMillis() - startTime;
+                float progress = (float) elapsed / ROTATION_ANIM_DURATION_MS;
+
+                if (progress >= 1f) {
+                    renderer.clearRotationAnimation();
+                    ((Timer) e.getSource()).stop();
+                } else {
+                    // Ease-out cubic para suavidade
+                    float eased = 1f - (1f - progress) * (1f - progress) * (1f - progress);
+                    renderer.setRotationProgress(eased);
+                }
+                repaint();
+            });
+            rotationAnimTimer.setRepeats(true);
+            rotationAnimTimer.start();
+        });
     }
 }

@@ -2,9 +2,7 @@ package bst.renderer;
 
 import bst.model.BSTNode;
 import bst.theme.Theme;
-
 import java.awt.*;
-import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +11,51 @@ public class TreeRenderer {
     private int highlightedValue  = Integer.MIN_VALUE;
     private int lastInsertedValue = Integer.MIN_VALUE;
 
+    // ── Animação de Rotação ──────────────────────────────────────────────────
+    private int    rotationPivotValue = Integer.MIN_VALUE;
+    private String rotationLabel      = null;
+    private float  rotationProgress   = 0f; // 0.0 a 1.0
+    private boolean rotationClockwise = true;
+
     public void setHighlightedValue(int val)  { this.highlightedValue  = val; }
     public void setLastInsertedValue(int val) { this.lastInsertedValue = val; }
     public void clearHighlight()              { this.highlightedValue  = Integer.MIN_VALUE; }
     public void clearLastInserted()           { this.lastInsertedValue = Integer.MIN_VALUE; }
+
+    /**
+     * Inicia a animação de rotação no nó pivô.
+     *
+     * @param pivotVal valor do nó pivô
+     * @param label texto curto da rotação (LL, LR, RR, RL)
+     * @param clockwise direção do arco animado
+     */
+    public void startRotationAnimation(int pivotVal, String label, boolean clockwise) {
+        this.rotationPivotValue = pivotVal;
+        this.rotationLabel = label;
+        this.rotationClockwise = clockwise;
+        this.rotationProgress = 0f;
+    }
+
+    /**
+     * Atualiza o progresso da animação (0.0 a 1.0).
+     */
+    public void setRotationProgress(float progress) {
+        this.rotationProgress = Math.min(1f, Math.max(0f, progress));
+    }
+
+    /**
+     * Limpa o estado de animação de rotação.
+     */
+    public void clearRotationAnimation() {
+        this.rotationPivotValue = Integer.MIN_VALUE;
+        this.rotationLabel = null;
+        this.rotationProgress = 0f;
+    }
+
+    /** Verifica se há animação de rotação ativa. */
+    public boolean isRotationAnimating() {
+        return rotationPivotValue != Integer.MIN_VALUE;
+    }
 
     // ── Layout ───────────────────────────────────────────────────────────────
 
@@ -58,6 +97,7 @@ public class TreeRenderer {
         int[] off = calcOffsets(root, canvasW);
         drawEdges(g2, root, off[0], Theme.CANVAS_PAD);
         drawNodes(g2, root, root, off[0], Theme.CANVAS_PAD);
+        drawRotationOverlay(g2, root, off[0], Theme.CANVAS_PAD);
     }
 
     // ── Hit test ─────────────────────────────────────────────────────────────
@@ -71,6 +111,92 @@ public class TreeRenderer {
             if (Point.distance(mx, my, cx, cy) <= Theme.NODE_RADIUS + 4) return n.val;
         }
         return Integer.MIN_VALUE;
+    }
+
+    // ── Animação de Rotação ─────────────────────────────────────────────────
+
+    private void drawRotationOverlay(Graphics2D g2, BSTNode root, int ox, int oy) {
+        if (rotationPivotValue == Integer.MIN_VALUE || rotationProgress <= 0f) return;
+
+        BSTNode pivot = findNode(root, rotationPivotValue);
+        if (pivot == null) return;
+
+        int cx = px(pivot, ox);
+        int cy = py(pivot, oy);
+        int arcRadius = Theme.NODE_RADIUS + 14;
+
+        float alpha = rotationProgress < 0.5f
+                ? rotationProgress * 2f
+                : 2f * (1f - rotationProgress);
+        int baseAlpha = (int) (alpha * 200);
+
+        // Arco animado ao redor do pivô
+        float sweep = rotationProgress * 270f;
+        int startAngle = rotationClockwise ? 90 : 90;
+        if (!rotationClockwise) sweep = -sweep;
+
+        // Glow externo
+        for (int i = 3; i >= 1; i--) {
+            int glowAlpha = (int) (alpha * 40 / i);
+            g2.setColor(new Color(100, 200, 255, glowAlpha));
+            g2.setStroke(new BasicStroke(i * 2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            int r = arcRadius + i * 4;
+            g2.drawArc(cx - r, cy - r, r * 2, r * 2, startAngle, (int) sweep);
+        }
+
+        // Arco principal
+        g2.setColor(new Color(100, 200, 255, baseAlpha));
+        g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.drawArc(cx - arcRadius, cy - arcRadius, arcRadius * 2, arcRadius * 2,
+                startAngle, (int) sweep);
+
+        // Seta na ponta do arco
+        if (rotationProgress > 0.1f) {
+            double endAngleRad = Math.toRadians(startAngle + sweep);
+            int ax = cx + (int) (arcRadius * Math.cos(endAngleRad));
+            int ay = cy - (int) (arcRadius * Math.sin(endAngleRad));
+
+            double arrowAngle = rotationClockwise
+                    ? endAngleRad - Math.PI / 2
+                    : endAngleRad + Math.PI / 2;
+            int arrowLen = 8;
+            int ax1 = ax + (int) (arrowLen * Math.cos(arrowAngle - 0.4));
+            int ay1 = ay - (int) (arrowLen * Math.sin(arrowAngle - 0.4));
+            int ax2 = ax + (int) (arrowLen * Math.cos(arrowAngle + 0.4));
+            int ay2 = ay - (int) (arrowLen * Math.sin(arrowAngle + 0.4));
+
+            g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.drawLine(ax, ay, ax1, ay1);
+            g2.drawLine(ax, ay, ax2, ay2);
+        }
+
+        // Label da rotação acima do pivô
+        if (rotationLabel != null && rotationProgress > 0.15f) {
+            int labelAlpha = (int) (alpha * 255);
+            g2.setFont(Theme.ui(Font.BOLD, 11));
+            FontMetrics fm = g2.getFontMetrics();
+            String text = rotationLabel;
+            int tw = fm.stringWidth(text);
+            int tx = cx - tw / 2;
+            int ty = cy - arcRadius - 12;
+
+            // Fundo do badge
+            g2.setColor(new Color(100, 200, 255, (int) (alpha * 30)));
+            g2.fillRoundRect(tx - 6, ty - fm.getAscent() - 2, tw + 12, fm.getHeight() + 4, 6, 6);
+            g2.setColor(new Color(100, 200, 255, (int) (alpha * 80)));
+            g2.drawRoundRect(tx - 6, ty - fm.getAscent() - 2, tw + 12, fm.getHeight() + 4, 6, 6);
+
+            // Texto
+            g2.setColor(new Color(100, 200, 255, labelAlpha));
+            g2.drawString(text, tx, ty);
+        }
+    }
+
+    private BSTNode findNode(BSTNode node, int val) {
+        if (node == null) return null;
+        if (node.val == val) return node;
+        BSTNode left = findNode(node.left, val);
+        return left != null ? left : findNode(node.right, val);
     }
 
     // ── Privados ─────────────────────────────────────────────────────────────

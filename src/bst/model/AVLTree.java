@@ -65,21 +65,27 @@ public class AVLTree extends BST {
         int bf = balanceFactor(node);
 
         // Caso Esquerda-Esquerda
-        if (bf > 1 && balanceFactor(node.left) >= 0)
+        if (bf > 1 && balanceFactor(node.left) >= 0) {
+            notifyRotation(RotationType.LEFT_LEFT, node.val);
             return rotateRight(node);
+        }
 
         // Caso Esquerda-Direita
         if (bf > 1 && balanceFactor(node.left) < 0) {
+            notifyRotation(RotationType.LEFT_RIGHT, node.val);
             node.left = rotateLeft(node.left);
             return rotateRight(node);
         }
 
         // Caso Direita-Direita
-        if (bf < -1 && balanceFactor(node.right) <= 0)
+        if (bf < -1 && balanceFactor(node.right) <= 0) {
+            notifyRotation(RotationType.RIGHT_RIGHT, node.val);
             return rotateLeft(node);
+        }
 
         // Caso Direita-Esquerda
         if (bf < -1 && balanceFactor(node.right) > 0) {
+            notifyRotation(RotationType.RIGHT_LEFT, node.val);
             node.right = rotateRight(node.right);
             return rotateLeft(node);
         }

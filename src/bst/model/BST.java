@@ -35,6 +35,9 @@ public class BST {
     protected void notifyChanged()         { observers.forEach(BSTObserver::onTreeChanged);       }
     protected void notifyInserted(int val) { observers.forEach(o -> o.onNodeInserted(val));       }
     protected void notifyRemoved(int val)  { observers.forEach(o -> o.onNodeRemoved(val));        }
+    protected void notifyRotation(RotationType type, int pivotVal) {
+        observers.forEach(o -> o.onRotation(type, pivotVal));
+    }
 
     // ── Operações Mutáveis ───────────────────────────────────────────────────
 

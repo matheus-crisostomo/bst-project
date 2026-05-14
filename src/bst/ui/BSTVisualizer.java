@@ -115,6 +115,8 @@ public class BSTVisualizer extends JFrame {
             controlPanel.setInputValue(String.valueOf(val));
             infoPanel.setSelectedNode(val);
         });
+
+        treePanel.setRotationToastCallback(this::showToast);
     }
 
     private void registerObservers() {
