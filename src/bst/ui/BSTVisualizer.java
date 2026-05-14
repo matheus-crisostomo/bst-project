@@ -30,6 +30,7 @@ public class BSTVisualizer extends JFrame {
     private TreePanel      treePanel;
     private InfoPanel      infoPanel;
     private TraversalPanel traversalPanel;
+    private HistoryPanel   historyPanel;
 
     private JLabel toastLabel;
     private Timer  toastTimer;
@@ -69,6 +70,7 @@ public class BSTVisualizer extends JFrame {
         treePanel      = new TreePanel(bst, renderer);
         infoPanel      = new InfoPanel(bst, analyzer);
         traversalPanel = new TraversalPanel(bst);
+        historyPanel   = new HistoryPanel();
 
         JScrollPane canvasScroll = new JScrollPane(treePanel);
         canvasScroll.setBorder(null);
@@ -80,11 +82,16 @@ public class BSTVisualizer extends JFrame {
         center.add(controlPanel, BorderLayout.NORTH);
         center.add(canvasScroll, BorderLayout.CENTER);
 
+        JPanel southPanel = new JPanel(new BorderLayout());
+        southPanel.setBackground(Theme.BG_PANEL);
+        southPanel.add(traversalPanel, BorderLayout.NORTH);
+        southPanel.add(historyPanel,   BorderLayout.CENTER);
+
         JPanel root = (JPanel) getContentPane();
         root.add(headerPanel,    BorderLayout.NORTH);
         root.add(center,         BorderLayout.CENTER);
         root.add(infoPanel,      BorderLayout.EAST);
-        root.add(traversalPanel, BorderLayout.SOUTH);
+        root.add(southPanel,     BorderLayout.SOUTH);
 
         buildToast();
     }
@@ -124,6 +131,7 @@ public class BSTVisualizer extends JFrame {
         controller.addObserver(treePanel);
         controller.addObserver(traversalPanel);
         controller.addObserver(infoPanel);
+        controller.addObserver(historyPanel);
     }
 
     // ── Save / Load ───────────────────────────────────────────────────────────

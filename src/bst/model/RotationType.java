@@ -10,10 +10,10 @@ package bst.model;
  */
 public enum RotationType {
 
-    LEFT_LEFT("Rotação Simples à Direita (LL)", "LL"),
-    LEFT_RIGHT("Rotação Dupla Esquerda-Direita (LR)", "LR"),
-    RIGHT_RIGHT("Rotação Simples à Esquerda (RR)", "RR"),
-    RIGHT_LEFT("Rotação Dupla Direita-Esquerda (RL)", "RL");
+    LEFT_LEFT("Rotação Simples à Direita", "RSD"),
+    LEFT_RIGHT("Rotação Dupla Esquerda-Direita", "RDD"),
+    RIGHT_RIGHT("Rotação Simples à Esquerda", "RSE"),
+    RIGHT_LEFT("Rotação Dupla Direita-Esquerda", "RDE");
 
     private final String description;
     private final String shortName;
@@ -28,7 +28,7 @@ public enum RotationType {
         return description;
     }
 
-    /** Nome curto (LL, LR, RR, RL). */
+    /** Nome curto (RSD, RDD, RSE, RDE). */
     public String getShortName() {
         return shortName;
     }
