@@ -4,30 +4,47 @@ import bst.model.BSTNode;
 import bst.theme.Theme;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * ╔══════════════════════════════════════════════════════╗
+ *   TreeRenderer — Renderizador da Árvore
+ *   Desenha nós, arestas e animações no canvas
+ * ╚══════════════════════════════════════════════════════╝
+ *
+ * Padrão: Strategy (separa algoritmo de desenho dos componentes Swing)
+ * Responsabilidade: layout, renderização e animação de transição de nós
+ */
 public class TreeRenderer {
 
     private int highlightedValue  = Integer.MIN_VALUE;
     private int lastInsertedValue = Integer.MIN_VALUE;
 
-    // ── Animação de Rotação ──────────────────────────────────────────────────
-    private int    rotationPivotValue = Integer.MIN_VALUE;
-    private String rotationLabel      = null;
-    private float  rotationProgress   = 0f; // 0.0 a 1.0
-    private boolean rotationClockwise = true;
+    // ── Animação de Rotação (overlay arco) ───────────────────────────────────
+    private int     rotationPivotValue = Integer.MIN_VALUE;
+    private String  rotationLabel      = null;
+    private float   rotationProgress   = 0f;
+    private boolean rotationClockwise  = true;
+
+    // ── Animação de Transição de Posição ─────────────────────────────────────
+    /** Posições anteriores dos nós (valor → [pixelX, pixelY]) antes da rotação. */
+    private Map<Integer, int[]> previousPositions = new HashMap<>();
+    /** Progresso da interpolação de posição (0.0 = posição antiga, 1.0 = posição nova). */
+    private float transitionProgress = 1f;
+    /** Último offset X usado no render (para snapshot de posições). */
+    private int lastOffsetX = 0;
 
     public void setHighlightedValue(int val)  { this.highlightedValue  = val; }
     public void setLastInsertedValue(int val) { this.lastInsertedValue = val; }
     public void clearHighlight()              { this.highlightedValue  = Integer.MIN_VALUE; }
     public void clearLastInserted()           { this.lastInsertedValue = Integer.MIN_VALUE; }
 
+    // ── API de Animação de Rotação ───────────────────────────────────────────
+
     /**
      * Inicia a animação de rotação no nó pivô.
-     *
-     * @param pivotVal valor do nó pivô
-     * @param label texto curto da rotação (LL, LR, RR, RL)
-     * @param clockwise direção do arco animado
      */
     public void startRotationAnimation(int pivotVal, String label, boolean clockwise) {
         this.rotationPivotValue = pivotVal;
@@ -36,25 +53,62 @@ public class TreeRenderer {
         this.rotationProgress = 0f;
     }
 
-    /**
-     * Atualiza o progresso da animação (0.0 a 1.0).
-     */
     public void setRotationProgress(float progress) {
         this.rotationProgress = Math.min(1f, Math.max(0f, progress));
     }
 
-    /**
-     * Limpa o estado de animação de rotação.
-     */
     public void clearRotationAnimation() {
         this.rotationPivotValue = Integer.MIN_VALUE;
         this.rotationLabel = null;
         this.rotationProgress = 0f;
     }
 
-    /** Verifica se há animação de rotação ativa. */
     public boolean isRotationAnimating() {
         return rotationPivotValue != Integer.MIN_VALUE;
+    }
+
+    // ── API de Transição de Posição ──────────────────────────────────────────
+
+    /**
+     * Captura as posições atuais de todos os nós antes de uma rotação.
+     * Deve ser chamado ANTES da árvore ser modificada.
+     */
+    public void snapshotPositions(BSTNode root, int canvasW) {
+        previousPositions.clear();
+        if (root == null) return;
+        assignPositions(root);
+        int[] off = calcOffsets(root, canvasW);
+        for (BSTNode n : collectAll(root)) {
+            previousPositions.put(n.val, new int[]{px(n, off[0]), py(n, Theme.CANVAS_PAD)});
+        }
+        lastOffsetX = off[0];
+    }
+
+    /**
+     * Inicia a transição animada das posições antigas para as novas.
+     */
+    public void startTransition() {
+        this.transitionProgress = 0f;
+    }
+
+    /**
+     * Atualiza o progresso da transição (0.0 a 1.0).
+     */
+    public void setTransitionProgress(float progress) {
+        this.transitionProgress = Math.min(1f, Math.max(0f, progress));
+    }
+
+    /**
+     * Limpa o estado de transição.
+     */
+    public void clearTransition() {
+        this.transitionProgress = 1f;
+        this.previousPositions.clear();
+    }
+
+    /** Verifica se há transição de posição ativa. */
+    public boolean isTransitioning() {
+        return transitionProgress < 1f && !previousPositions.isEmpty();
     }
 
     // ── Layout ───────────────────────────────────────────────────────────────
@@ -95,9 +149,18 @@ public class TreeRenderer {
         }
 
         int[] off = calcOffsets(root, canvasW);
-        drawEdges(g2, root, off[0], Theme.CANVAS_PAD);
-        drawNodes(g2, root, root, off[0], Theme.CANVAS_PAD);
-        drawRotationOverlay(g2, root, off[0], Theme.CANVAS_PAD);
+        int ox = off[0];
+        int oy = Theme.CANVAS_PAD;
+
+        if (isTransitioning()) {
+            drawEdgesInterpolated(g2, root, ox, oy);
+            drawNodesInterpolated(g2, root, root, ox, oy);
+        } else {
+            drawEdges(g2, root, ox, oy);
+            drawNodes(g2, root, root, ox, oy);
+        }
+
+        drawRotationOverlay(g2, root, ox, oy);
     }
 
     // ── Hit test ─────────────────────────────────────────────────────────────
@@ -113,7 +176,47 @@ public class TreeRenderer {
         return Integer.MIN_VALUE;
     }
 
-    // ── Animação de Rotação ─────────────────────────────────────────────────
+    // ── Renderização com Interpolação ────────────────────────────────────────
+
+    private int[] interpolatedPos(BSTNode node, int ox, int oy) {
+        int targetX = px(node, ox);
+        int targetY = py(node, oy);
+
+        if (!isTransitioning()) return new int[]{targetX, targetY};
+
+        int[] prev = previousPositions.get(node.val);
+        if (prev == null) return new int[]{targetX, targetY};
+
+        float t = transitionProgress;
+        int interpX = prev[0] + (int) ((targetX - prev[0]) * t);
+        int interpY = prev[1] + (int) ((targetY - prev[1]) * t);
+        return new int[]{interpX, interpY};
+    }
+
+    private void drawEdgesInterpolated(Graphics2D g2, BSTNode node, int ox, int oy) {
+        if (node == null) return;
+        int[] pos = interpolatedPos(node, ox, oy);
+        if (node.left != null) {
+            int[] childPos = interpolatedPos(node.left, ox, oy);
+            drawEdge(g2, pos[0], pos[1], childPos[0], childPos[1]);
+            drawEdgesInterpolated(g2, node.left, ox, oy);
+        }
+        if (node.right != null) {
+            int[] childPos = interpolatedPos(node.right, ox, oy);
+            drawEdge(g2, pos[0], pos[1], childPos[0], childPos[1]);
+            drawEdgesInterpolated(g2, node.right, ox, oy);
+        }
+    }
+
+    private void drawNodesInterpolated(Graphics2D g2, BSTNode node, BSTNode root, int ox, int oy) {
+        if (node == null) return;
+        drawNodesInterpolated(g2, node.left, root, ox, oy);
+        drawNodesInterpolated(g2, node.right, root, ox, oy);
+        int[] pos = interpolatedPos(node, ox, oy);
+        drawNodeAt(g2, node, node == root, pos[0], pos[1]);
+    }
+
+    // ── Animação de Rotação (overlay) ────────────────────────────────────────
 
     private void drawRotationOverlay(Graphics2D g2, BSTNode root, int ox, int oy) {
         if (rotationPivotValue == Integer.MIN_VALUE || rotationProgress <= 0f) return;
@@ -121,8 +224,9 @@ public class TreeRenderer {
         BSTNode pivot = findNode(root, rotationPivotValue);
         if (pivot == null) return;
 
-        int cx = px(pivot, ox);
-        int cy = py(pivot, oy);
+        int[] pos = interpolatedPos(pivot, ox, oy);
+        int cx = pos[0];
+        int cy = pos[1];
         int arcRadius = Theme.NODE_RADIUS + 14;
 
         float alpha = rotationProgress < 0.5f
@@ -132,7 +236,7 @@ public class TreeRenderer {
 
         // Arco animado ao redor do pivô
         float sweep = rotationProgress * 270f;
-        int startAngle = rotationClockwise ? 90 : 90;
+        int startAngle = 90;
         if (!rotationClockwise) sweep = -sweep;
 
         // Glow externo
@@ -180,13 +284,11 @@ public class TreeRenderer {
             int tx = cx - tw / 2;
             int ty = cy - arcRadius - 12;
 
-            // Fundo do badge
             g2.setColor(new Color(100, 200, 255, (int) (alpha * 30)));
             g2.fillRoundRect(tx - 6, ty - fm.getAscent() - 2, tw + 12, fm.getHeight() + 4, 6, 6);
             g2.setColor(new Color(100, 200, 255, (int) (alpha * 80)));
             g2.drawRoundRect(tx - 6, ty - fm.getAscent() - 2, tw + 12, fm.getHeight() + 4, 6, 6);
 
-            // Texto
             g2.setColor(new Color(100, 200, 255, labelAlpha));
             g2.drawString(text, tx, ty);
         }
@@ -208,7 +310,6 @@ public class TreeRenderer {
     }
 
     private void drawBackground(Graphics2D g2, int w, int h) {
-        // grade sutil
         g2.setColor(new Color(255, 255, 255, 3));
         g2.setStroke(new BasicStroke(1f));
         for (int x = 0; x < w; x += 44) g2.drawLine(x, 0, x, h);
@@ -218,13 +319,11 @@ public class TreeRenderer {
     private void drawEmpty(Graphics2D g2, int w, int h) {
         int cx = w / 2, cy = h / 2;
 
-        // círculo tracejado
         g2.setColor(new Color(255, 255, 255, 12));
         g2.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                 1f, new float[]{5f, 5f}, 0f));
         g2.drawOval(cx - 36, cy - 50, 72, 72);
 
-        // ícone
         g2.setStroke(new BasicStroke(1.5f));
         g2.setColor(new Color(255, 255, 255, 20));
         g2.drawLine(cx, cy - 16, cx - 18, cy + 10);
@@ -256,13 +355,11 @@ public class TreeRenderer {
         if (node == null) return;
         drawNodes(g2, node.left,  root, ox, oy);
         drawNodes(g2, node.right, root, ox, oy);
-        drawNode(g2, node, node == root, ox, oy);
+        drawNodeAt(g2, node, node == root, px(node, ox), py(node, oy));
     }
 
-    private void drawNode(Graphics2D g2, BSTNode node, boolean isRoot, int ox, int oy) {
-        final int R  = Theme.NODE_RADIUS;
-        int cx = px(node, ox);
-        int cy = py(node, oy);
+    private void drawNodeAt(Graphics2D g2, BSTNode node, boolean isRoot, int cx, int cy) {
+        final int R = Theme.NODE_RADIUS;
 
         boolean isNew = node.val == lastInsertedValue;
         boolean isHl  = node.val == highlightedValue;

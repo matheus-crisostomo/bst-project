@@ -37,6 +37,10 @@ public class TreePanel extends JPanel implements BSTObserver {
     private static final int ROTATION_ANIM_DURATION_MS = 900;
     private static final int ROTATION_ANIM_FPS = 40;
 
+    /** Estado pendente de rotação (capturado em onRotation, consumido em onTreeChanged). */
+    private RotationType pendingRotationType = null;
+    private int pendingRotationPivot = Integer.MIN_VALUE;
+
     public TreePanel(BST bst, TreeRenderer renderer) {
         this.bst      = bst;
         this.renderer = renderer;
@@ -111,7 +115,12 @@ public class TreePanel extends JPanel implements BSTObserver {
 
     @Override
     public void onTreeChanged() {
-        SwingUtilities.invokeLater(this::repaint);
+        SwingUtilities.invokeLater(() -> {
+            if (pendingRotationType != null) {
+                startRotationAnimations();
+            }
+            repaint();
+        });
     }
 
     @Override
@@ -133,40 +142,65 @@ public class TreePanel extends JPanel implements BSTObserver {
 
     @Override
     public void onRotation(RotationType type, int pivotVal) {
-        SwingUtilities.invokeLater(() -> {
-            // Determina direção do arco baseado no tipo de rotação
-            boolean clockwise = (type == RotationType.LEFT_LEFT || type == RotationType.RIGHT_LEFT);
+        // Captura posições ANTES da rotação modificar a árvore.
+        // Se já há uma rotação pendente (cascata), mantém o snapshot original
+        // mas atualiza o tipo/pivô para a última rotação da cascata.
+        if (pendingRotationType == null) {
+            int canvasW = getParent() != null ? getParent().getWidth() : getWidth();
+            renderer.snapshotPositions(bst.root, canvasW);
+        }
+        pendingRotationType = type;
+        pendingRotationPivot = pivotVal;
+    }
 
-            renderer.startRotationAnimation(pivotVal, type.getShortName(), clockwise);
+    /**
+     * Inicia as animações de rotação (arco + transição de nós) após a árvore mudar.
+     * Chamado pelo onTreeChanged quando há uma rotação pendente.
+     */
+    private void startRotationAnimations() {
+        RotationType type = pendingRotationType;
+        int pivotVal = pendingRotationPivot;
+        pendingRotationType = null;
+        pendingRotationPivot = Integer.MIN_VALUE;
 
-            // Exibe toast com descrição da rotação
-            rotationToastCallback.accept(type.getDescription() + " no nó " + pivotVal, "info");
+        if (type == null) return;
 
-            // Animação com timer
-            if (rotationAnimTimer != null && rotationAnimTimer.isRunning()) {
-                rotationAnimTimer.stop();
+        // Determina direção do arco baseado no tipo de rotação
+        boolean clockwise = (type == RotationType.LEFT_LEFT || type == RotationType.RIGHT_LEFT);
+
+        renderer.startRotationAnimation(pivotVal, type.getShortName(), clockwise);
+        renderer.startTransition();
+
+        // Exibe toast com descrição da rotação
+        rotationToastCallback.accept(type.getDescription() + " no nó " + pivotVal, "info");
+
+        // Animação com timer
+        if (rotationAnimTimer != null && rotationAnimTimer.isRunning()) {
+            rotationAnimTimer.stop();
+            renderer.clearRotationAnimation();
+            renderer.clearTransition();
+        }
+
+        long startTime = System.currentTimeMillis();
+        int interval = 1000 / ROTATION_ANIM_FPS;
+
+        rotationAnimTimer = new Timer(interval, e -> {
+            long elapsed = System.currentTimeMillis() - startTime;
+            float progress = (float) elapsed / ROTATION_ANIM_DURATION_MS;
+
+            if (progress >= 1f) {
                 renderer.clearRotationAnimation();
+                renderer.clearTransition();
+                ((Timer) e.getSource()).stop();
+            } else {
+                // Ease-out cubic para suavidade
+                float eased = 1f - (1f - progress) * (1f - progress) * (1f - progress);
+                renderer.setRotationProgress(eased);
+                renderer.setTransitionProgress(eased);
             }
-
-            long startTime = System.currentTimeMillis();
-            int interval = 1000 / ROTATION_ANIM_FPS;
-
-            rotationAnimTimer = new Timer(interval, e -> {
-                long elapsed = System.currentTimeMillis() - startTime;
-                float progress = (float) elapsed / ROTATION_ANIM_DURATION_MS;
-
-                if (progress >= 1f) {
-                    renderer.clearRotationAnimation();
-                    ((Timer) e.getSource()).stop();
-                } else {
-                    // Ease-out cubic para suavidade
-                    float eased = 1f - (1f - progress) * (1f - progress) * (1f - progress);
-                    renderer.setRotationProgress(eased);
-                }
-                repaint();
-            });
-            rotationAnimTimer.setRepeats(true);
-            rotationAnimTimer.start();
+            repaint();
         });
+        rotationAnimTimer.setRepeats(true);
+        rotationAnimTimer.start();
     }
 }
