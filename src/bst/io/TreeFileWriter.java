@@ -1,6 +1,8 @@
 package bst.io;
 
 import bst.model.BST;
+import bst.model.AVLTree;
+import bst.model.RedBlackTree;
 import bst.model.BSTAnalyzer;
 import bst.model.BSTNode;
 import java.io.*;
@@ -99,9 +101,13 @@ public class TreeFileWriter {
         String sep  = "═".repeat(52);
         String sep2 = "─".repeat(52);
 
+        String treeTypeStr = "Árvore Binária de Busca (Padrão)";
+        if (bst instanceof AVLTree) treeTypeStr = "Árvore AVL";
+        else if (bst instanceof RedBlackTree) treeTypeStr = "Árvore Rubro-Negra";
+
         // ── Cabeçalho ────────────────────────────────────────
         sb.append("╔").append("═".repeat(50)).append("╗\n");
-        sb.append("║   ÁRVORE BINÁRIA DE BUSCA                       ║\n");
+        sb.append(String.format("║   %-46s ║%n", treeTypeStr.toUpperCase()));
         sb.append("║   Formato: Parênteses Aninhados                 ║\n");
         sb.append("╚").append("═".repeat(50)).append("╝\n");
         sb.append("  Gerado em: ")
@@ -112,6 +118,26 @@ public class TreeFileWriter {
         if (root == null) {
             sb.append("  ⚠  A árvore está vazia — nenhum dado para exportar.\n");
             return sb.toString();
+        }
+
+        // ── Histórico de Operações ───────────────────────────
+        sb.append(sep).append("\n");
+        sb.append("  HISTÓRICO DE OPERAÇÕES E ROTAÇÕES\n");
+        sb.append(sep2).append("\n");
+        List<BST.TreeOperation> ops = bst.getOperationHistory();
+        if (ops.isEmpty()) {
+            sb.append("  (Nenhuma operação rastreada)\n\n");
+        } else {
+            for (int i = 0; i < ops.size(); i++) {
+                BST.TreeOperation op = ops.get(i);
+                sb.append(String.format("  %d. %s(%d)", i + 1, op.type, op.val));
+                if (op.rotations.isEmpty()) {
+                    sb.append(" -> Nenhuma rotação\n");
+                } else {
+                    sb.append(" -> Rotações: ").append(String.join(", ", op.rotations)).append("\n");
+                }
+            }
+            sb.append("\n");
         }
 
         // ── 1. Parênteses Aninhados — compacto ───────────────
@@ -195,8 +221,50 @@ public class TreeFileWriter {
             sb.append(String.format("  %-8d %-8d %-12d %-8d %-6s%n",
                     val, level, depth, hNode, isLeaf ? "Sim" : "Não"));
         }
+        sb.append("\n");
+
+        // ── 8. Comparativo com outras Estruturas ──────────────
+        sb.append(sep).append("\n");
+        sb.append("  8. COMPARAÇÃO COM OUTRAS ESTRUTURAS\n");
+        sb.append("  Aplicando a mesma sequência de inserções/remoções\n");
+        sb.append(sep2).append("\n");
+
+        if (bst.getClass() != BST.class) {
+            BST bstNormal = new BST();
+            applyOperations(bstNormal, ops);
+            sb.append("\n  [ ÁRVORE BST PADRÃO ]\n");
+            sb.append("  Parênteses: ").append(toNestedParentheses(bstNormal.root)).append("\n");
+            sb.append("  In-Order  : ").append(joinArrow(bstNormal.inorder())).append("\n");
+        }
+
+        if (!(bst instanceof AVLTree)) {
+            AVLTree avl = new AVLTree();
+            applyOperations(avl, ops);
+            sb.append("\n  [ ÁRVORE AVL ]\n");
+            sb.append("  Parênteses: ").append(toNestedParentheses(avl.root)).append("\n");
+            sb.append("  In-Order  : ").append(joinArrow(avl.inorder())).append("\n");
+        }
+
+        if (!(bst instanceof RedBlackTree)) {
+            RedBlackTree rb = new RedBlackTree();
+            applyOperations(rb, ops);
+            sb.append("\n  [ ÁRVORE RUBRO-NEGRA ]\n");
+            sb.append("  Parênteses: ").append(toNestedParentheses(rb.root)).append("\n");
+            sb.append("  In-Order  : ").append(joinArrow(rb.inorder())).append("\n");
+        }
+        sb.append("\n");
 
         return sb.toString();
+    }
+
+    private void applyOperations(BST target, List<BST.TreeOperation> ops) {
+        for (BST.TreeOperation op : ops) {
+            if ("INSERIR".equals(op.type)) {
+                target.insert(op.val);
+            } else if ("REMOVER".equals(op.type)) {
+                target.remove(op.val);
+            }
+        }
     }
 
     // ═════════════════════════════════════════════════════════════════════════

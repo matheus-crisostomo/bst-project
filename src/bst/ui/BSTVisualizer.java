@@ -5,6 +5,7 @@ import bst.io.TreeFileReader;
 import bst.io.TreeFileWriter;
 import bst.model.AVLTree;
 import bst.model.BST;
+import bst.model.RedBlackTree;
 import bst.model.BSTAnalyzer;
 import bst.renderer.TreeRenderer;
 import bst.theme.Theme;
@@ -36,12 +37,15 @@ public class BSTVisualizer extends JFrame {
     private Timer  toastTimer;
 
     public BSTVisualizer(TreeType treeType) {
-        super(treeType == TreeType.AVL ? "AVL Visualizer" : "BST Visualizer");
+        super(treeType == TreeType.AVL ? "AVL Visualizer" : 
+              treeType == TreeType.RB ? "Red-Black Visualizer" : "BST Visualizer");
 
-        bst        = treeType == TreeType.AVL ? new AVLTree() : new BST();
+        bst        = treeType == TreeType.AVL ? new AVLTree() : 
+                     treeType == TreeType.RB ? new RedBlackTree() : new BST();
         controller = new BSTController(bst);
         analyzer   = new BSTAnalyzer();
         renderer   = new TreeRenderer();
+        renderer.setEnableRBColors(treeType == TreeType.RB);
         fileWriter = new TreeFileWriter(analyzer);
         fileReader = new TreeFileReader();
 

@@ -13,7 +13,7 @@ import java.awt.event.*;
  */
 public class TreeTypeDialog extends JDialog {
 
-    public enum TreeType { BST, AVL }
+    public enum TreeType { BST, AVL, RB }
 
     private TreeType selectedType = null;
 
@@ -42,7 +42,7 @@ public class TreeTypeDialog extends JDialog {
             }
         };
         root.setOpaque(false);
-        root.setPreferredSize(new Dimension(480, 320));
+        root.setPreferredSize(new Dimension(720, 320));
         root.setBorder(new EmptyBorder(32, 32, 28, 32));
 
         root.add(buildHeader(),  BorderLayout.NORTH);
@@ -75,7 +75,7 @@ public class TreeTypeDialog extends JDialog {
     }
 
     private JPanel buildCards() {
-        JPanel p = new JPanel(new GridLayout(1, 2, 12, 0));
+        JPanel p = new JPanel(new GridLayout(1, 3, 12, 0));
         p.setOpaque(false);
 
         p.add(buildCard(
@@ -92,6 +92,14 @@ public class TreeTypeDialog extends JDialog {
             "Árvore AVL",
             "Balanceamento automático após\ncada inserção e remoção.",
             Theme.ACCENT_GREEN
+        ));
+
+        p.add(buildCard(
+            TreeType.RB,
+            "RB",
+            "Árvore Rubro-Negra",
+            "Balanceamento automático com\nregras de coloração de nós.",
+            Theme.ACCENT_ORANGE
         ));
 
         return p;

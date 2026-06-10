@@ -15,6 +15,7 @@ public class AVLTree extends BST {
 
     @Override
     public boolean insert(int val) {
+        startOperation("INSERIR", val);
         if (contains(root, val)) return false;
         root = insertAVL(root, val);
         notifyInserted(val);
@@ -34,6 +35,7 @@ public class AVLTree extends BST {
 
     @Override
     public boolean remove(int val) {
+        startOperation("REMOVER", val);
         if (!contains(root, val)) return false;
         root = removeAVL(root, val);
         notifyRemoved(val);

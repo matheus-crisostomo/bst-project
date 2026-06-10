@@ -22,6 +22,25 @@ public class BST {
     /** Lista de observadores registrados. */
     private final List<BSTObserver> observers = new ArrayList<>();
 
+    public static class TreeOperation {
+        public final String type;
+        public final int val;
+        public final List<String> rotations = new ArrayList<>();
+        public TreeOperation(String type, int val) { this.type = type; this.val = val; }
+    }
+
+    private final List<TreeOperation> operationHistory = new ArrayList<>();
+    private TreeOperation currentOp = null;
+
+    public List<TreeOperation> getOperationHistory() {
+        return operationHistory;
+    }
+
+    protected void startOperation(String type, int val) {
+        currentOp = new TreeOperation(type, val);
+        operationHistory.add(currentOp);
+    }
+
     // ── Gerenciamento de Observadores ────────────────────────────────────────
 
     public void addObserver(BSTObserver observer) {
@@ -36,6 +55,9 @@ public class BST {
     protected void notifyInserted(int val) { observers.forEach(o -> o.onNodeInserted(val));       }
     protected void notifyRemoved(int val)  { observers.forEach(o -> o.onNodeRemoved(val));        }
     protected void notifyRotation(RotationType type, int pivotVal) {
+        if (currentOp != null) {
+            currentOp.rotations.add(type.getShortName() + " no nó " + pivotVal);
+        }
         observers.forEach(o -> o.onRotation(type, pivotVal));
     }
 
@@ -49,6 +71,7 @@ public class BST {
      * @return {@code true} se inserido, {@code false} se duplicado
      */
     public boolean insert(int val) {
+        startOperation("INSERIR", val);
         BSTNode node = new BSTNode(val);
 
         if (root == null) {
@@ -88,6 +111,7 @@ public class BST {
      * @return {@code true} se removido, {@code false} se não encontrado
      */
     public boolean remove(int val) {
+        startOperation("REMOVER", val);
         BSTNode parent = null;
         BSTNode cur    = root;
         boolean isLeft = false;
@@ -136,6 +160,8 @@ public class BST {
      */
     public void clear() {
         root = null;
+        operationHistory.clear();
+        currentOp = null;
         notifyChanged();
     }
 
@@ -144,6 +170,8 @@ public class BST {
      * o filho esquerdo de cada nó troca com o filho direito.
      */
     public void mirror() {
+        operationHistory.clear();
+        currentOp = null;
         mirror(root);
         notifyChanged();
     }

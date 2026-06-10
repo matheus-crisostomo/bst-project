@@ -21,6 +21,13 @@ public class BSTNode {
     public BSTNode right;
 
     /**
+     * Cor do nó (usado na Árvore Rubro-Negra).
+     * true = RED, false = BLACK.
+     * Nós novos nascem vermelhos por padrão.
+     */
+    public boolean color = true;
+
+    /**
      * Coluna na grade de layout (atribuída pelo TreeRenderer
      * via travessia in-order — não faz parte da lógica BST).
      */

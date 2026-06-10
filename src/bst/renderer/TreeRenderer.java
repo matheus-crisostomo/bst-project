@@ -21,6 +21,7 @@ public class TreeRenderer {
 
     private int highlightedValue  = Integer.MIN_VALUE;
     private int lastInsertedValue = Integer.MIN_VALUE;
+    private boolean enableRBColors = false;
 
     // ── Animação de Rotação (overlay arco) ───────────────────────────────────
     private int     rotationPivotValue = Integer.MIN_VALUE;
@@ -38,6 +39,7 @@ public class TreeRenderer {
 
     public void setHighlightedValue(int val)  { this.highlightedValue  = val; }
     public void setLastInsertedValue(int val) { this.lastInsertedValue = val; }
+    public void setEnableRBColors(boolean enable) { this.enableRBColors = enable; }
     public void clearHighlight()              { this.highlightedValue  = Integer.MIN_VALUE; }
     public void clearLastInserted()           { this.lastInsertedValue = Integer.MIN_VALUE; }
 
@@ -379,21 +381,30 @@ public class TreeRenderer {
         g2.setColor(new Color(0, 0, 0, 60));
         g2.fillOval(cx - R + 2, cy - R + 2, R * 2, R * 2);
 
-        // preenchimento glass
-        if (isNew) {
-            g2.setColor(new Color(255, 255, 255, 22));
-        } else if (isHl) {
-            g2.setColor(new Color(255, 255, 255, 16));
+        // Define a cor base do nó (vermelho ou preto para RB Tree, padrão para as outras)
+        Color fillColor;
+        Color borderColor;
+        if (enableRBColors) {
+            if (node.color) { // RED
+                fillColor = isNew ? new Color(255, 60, 60, 45) : isHl ? new Color(255, 60, 60, 35) : new Color(255, 60, 60, 20);
+                borderColor = new Color(255, 80, 80, (isNew || isHl) ? 140 : isRoot ? 100 : 70);
+            } else { // BLACK
+                fillColor = isNew ? new Color(20, 20, 20, 255) : isHl ? new Color(30, 30, 30, 255) : new Color(15, 15, 15, 255);
+                borderColor = new Color(80, 80, 80, (isNew || isHl) ? 180 : isRoot ? 140 : 100);
+            }
         } else {
-            g2.setColor(new Color(255, 255, 255, 8));
+            fillColor = isNew ? new Color(255, 255, 255, 22) : isHl ? new Color(255, 255, 255, 16) : new Color(255, 255, 255, 8);
+            borderColor = new Color(255, 255, 255, (isNew || isHl) ? 90 : isRoot ? 60 : 30);
         }
+
+        // preenchimento glass
+        g2.setColor(fillColor);
         g2.fillOval(cx - R, cy - R, R * 2, R * 2);
 
         // borda
         float sw = (isNew || isHl || isRoot) ? 1.8f : 1.2f;
-        int   ba = (isNew || isHl) ? 90 : isRoot ? 60 : 30;
         g2.setStroke(new BasicStroke(sw));
-        g2.setColor(new Color(255, 255, 255, ba));
+        g2.setColor(borderColor);
         g2.drawOval(cx - R, cy - R, R * 2, R * 2);
 
         // reflexo interno
