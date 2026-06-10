@@ -17,11 +17,27 @@ public class TraversalPanel extends JPanel implements BSTObserver {
 
     public TraversalPanel(BST bst) {
         this.bst = bst;
-        setBackground(Theme.BG_PANEL);
-        setBorder(new MatteBorder(1, 0, 0, 0, Theme.BORDER));
-        setPreferredSize(new Dimension(0, 52));
+        setOpaque(false);
+        setBorder(new EmptyBorder(10, 16, 0, 16));
+        setPreferredSize(new Dimension(0, 68));
         setLayout(new BorderLayout());
-        add(buildInner(), BorderLayout.CENTER);
+
+        JPanel container = new JPanel(new BorderLayout()) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Theme.BG_PANEL);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
+                g2.setColor(Theme.BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 16, 16);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        container.setOpaque(false);
+        container.add(buildInner(), BorderLayout.CENTER);
+
+        add(container, BorderLayout.CENTER);
         showPlaceholder();
     }
 
@@ -40,6 +56,8 @@ public class TraversalPanel extends JPanel implements BSTObserver {
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
+        scroll.getHorizontalScrollBar().setUI(new bst.theme.ModernScrollBarUI());
+        scroll.getHorizontalScrollBar().setOpaque(false);
 
         JPanel inner = new JPanel(new BorderLayout());
         inner.setOpaque(false);

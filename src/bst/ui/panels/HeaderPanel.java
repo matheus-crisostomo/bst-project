@@ -19,8 +19,8 @@ public class HeaderPanel extends JPanel implements BSTObserver {
     public HeaderPanel(BST bst, TreeType treeType) {
         this.bst      = bst;
         this.treeType = treeType;
-        setBackground(Theme.BG_PANEL);
-        setBorder(new MatteBorder(0, 0, 1, 0, Theme.BORDER));
+        setOpaque(false);
+        setBorder(new EmptyBorder(0, 0, 0, 0));
         setPreferredSize(new Dimension(0, 60));
         setLayout(new BorderLayout());
         add(buildLogo(),  BorderLayout.WEST);
@@ -139,4 +139,19 @@ public class HeaderPanel extends JPanel implements BSTObserver {
     @Override public void onTreeChanged()       { SwingUtilities.invokeLater(this::refreshStats); }
     @Override public void onNodeInserted(int v) {}
     @Override public void onNodeRemoved(int v)  {}
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setColor(Theme.BG_PANEL);
+        g2.fillRect(0, 0, getWidth(), getHeight());
+        
+        g2.setColor(new Color(255, 255, 255, 10));
+        g2.drawLine(0, getHeight() - 2, getWidth(), getHeight() - 2);
+        g2.setColor(new Color(0, 0, 0, 80));
+        g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
+        
+        g2.dispose();
+        super.paintComponent(g);
+    }
 }

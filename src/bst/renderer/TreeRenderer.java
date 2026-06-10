@@ -33,8 +33,7 @@ public class TreeRenderer {
     public void setEnableRBColors(boolean enable) { this.enableRBColors = enable; }
     public void clearHighlight()              { this.highlightedValue  = Integer.MIN_VALUE; }
     public void clearLastInserted()           { this.lastInsertedValue = Integer.MIN_VALUE; }
-
-
+    /**
      * Inicia a animação de rotação no nó pivô.
      */
     public void startRotationAnimation(int pivotVal, String label, boolean clockwise) {
@@ -57,8 +56,7 @@ public class TreeRenderer {
     public boolean isRotationAnimating() {
         return rotationPivotValue != Integer.MIN_VALUE;
     }
-
-
+    /**
      * Captura as posições atuais de todos os nós antes de uma rotação.
      * Deve ser chamado ANTES da árvore ser modificada.
      */
@@ -100,7 +98,7 @@ public class TreeRenderer {
         return transitionProgress < 1f && !previousPositions.isEmpty();
     }
 
-
+    public void assignPositions(BSTNode root) {
         int[] counter = {0};
         assignRec(root, 0, counter);
     }
@@ -124,7 +122,7 @@ public class TreeRenderer {
         return new Dimension(w, h);
     }
 
-
+    public void render(Graphics2D g2, BSTNode root, int canvasW, int canvasH) {
         applyHints(g2);
         drawBackground(g2, canvasW, canvasH);
 
@@ -148,7 +146,7 @@ public class TreeRenderer {
         drawRotationOverlay(g2, root, ox, oy);
     }
 
-
+    public int getNodeAt(BSTNode root, int canvasW, int mx, int my) {
         if (root == null) return Integer.MIN_VALUE;
         int[] off = calcOffsets(root, canvasW);
         for (BSTNode n : collectAll(root)) {
@@ -158,8 +156,7 @@ public class TreeRenderer {
         }
         return Integer.MIN_VALUE;
     }
-
-
+    private int[] interpolatedPos(BSTNode node, int ox, int oy) {
         int targetX = px(node, ox);
         int targetY = py(node, oy);
 
@@ -196,8 +193,7 @@ public class TreeRenderer {
         int[] pos = interpolatedPos(node, ox, oy);
         drawNodeAt(g2, node, node == root, pos[0], pos[1]);
     }
-
-
+    private void drawRotationOverlay(Graphics2D g2, BSTNode root, int ox, int oy) {
         if (rotationPivotValue == Integer.MIN_VALUE || rotationProgress <= 0f) return;
 
         BSTNode pivot = findNode(root, rotationPivotValue);
@@ -279,15 +275,24 @@ public class TreeRenderer {
         BSTNode left = findNode(node.left, val);
         return left != null ? left : findNode(node.right, val);
     }
-
-
+    private void applyHints(Graphics2D g2) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,      RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING,         RenderingHints.VALUE_RENDER_QUALITY);
     }
 
     private void drawBackground(Graphics2D g2, int w, int h) {
-        g2.setColor(new Color(255, 255, 255, 3));
+        // Radial Gradient Background
+        Point center = new Point(w / 2, h / 2);
+        float radius = Math.max(w, h) * 0.8f;
+        float[] dist = {0.0f, 1.0f};
+        Color[] colors = {new Color(30, 25, 45), Theme.BG_DARK}; // Deep indigo to dark
+        RadialGradientPaint p = new RadialGradientPaint(center, radius, dist, colors);
+        g2.setPaint(p);
+        g2.fillRect(0, 0, w, h);
+
+        // Subtle grid overlay
+        g2.setColor(new Color(255, 255, 255, 2));
         g2.setStroke(new BasicStroke(1f));
         for (int x = 0; x < w; x += 44) g2.drawLine(x, 0, x, h);
         for (int y = 0; y < h; y += 44) g2.drawLine(0, y, w, y);
@@ -352,9 +357,11 @@ public class TreeRenderer {
             }
         }
 
-        // sombra
-        g2.setColor(new Color(0, 0, 0, 60));
-        g2.fillOval(cx - R + 2, cy - R + 2, R * 2, R * 2);
+        // sombra projetada mais rica (drop shadow)
+        for(int i = 0; i < 4; i++) {
+            g2.setColor(new Color(0, 0, 0, 20 - i*4));
+            g2.fillOval(cx - R + 1 - i, cy - R + 4 - i, R * 2 + i*2, R * 2 + i*2);
+        }
 
         // Define a cor base do nó (vermelho ou preto para RB Tree, padrão para as outras)
         Color fillColor;
@@ -376,15 +383,20 @@ public class TreeRenderer {
         g2.setColor(fillColor);
         g2.fillOval(cx - R, cy - R, R * 2, R * 2);
 
-        // borda
+        // borda interna superior simulando vidro
+        g2.setColor(new Color(255, 255, 255, 30));
+        g2.setStroke(new BasicStroke(1.5f));
+        g2.drawArc(cx - R + 1, cy - R + 1, R * 2 - 2, R * 2 - 2, 45, 90);
+
+        // borda principal
         float sw = (isNew || isHl || isRoot) ? 1.8f : 1.2f;
         g2.setStroke(new BasicStroke(sw));
         g2.setColor(borderColor);
         g2.drawOval(cx - R, cy - R, R * 2, R * 2);
 
-        // reflexo interno
-        g2.setColor(new Color(255, 255, 255, 10));
-        g2.fillArc(cx - R + 5, cy - R + 5, R - 4, R - 4, 30, 110);
+        // reflexo brilhante sutil
+        g2.setColor(new Color(255, 255, 255, 15));
+        g2.fillOval(cx - R + 4, cy - R + 2, R * 2 - 8, R - 6);
 
         // texto
         String text = String.valueOf(node.val);

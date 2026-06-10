@@ -24,31 +24,51 @@ public class HistoryPanel extends JPanel implements BSTObserver {
     private final List<String> pendingRotations = new ArrayList<>();
 
     public HistoryPanel() {
-        setBackground(Theme.BG_PANEL);
-        setBorder(new MatteBorder(1, 0, 0, 0, Theme.BORDER));
-        setPreferredSize(new Dimension(0, 140));
+        setOpaque(false);
+        setBorder(new EmptyBorder(10, 16, 10, 16));
+        setPreferredSize(new Dimension(0, 160));
         setLayout(new BorderLayout());
 
-        add(buildHeader(), BorderLayout.NORTH);
+        JPanel container = new JPanel(new BorderLayout()) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Theme.BG_PANEL);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
+                g2.setColor(new Color(255, 255, 255, 10)); // inner light
+                g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 16, 16);
+                g2.setColor(Theme.BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 16, 16);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        container.setOpaque(false);
+
+        container.add(buildHeader(), BorderLayout.NORTH);
 
         entriesPanel = new JPanel();
         entriesPanel.setLayout(new BoxLayout(entriesPanel, BoxLayout.Y_AXIS));
-        entriesPanel.setBackground(Theme.BG_PANEL);
+        entriesPanel.setOpaque(false);
 
         scrollPane = new JScrollPane(entriesPanel);
         scrollPane.setBorder(null);
-        scrollPane.setBackground(Theme.BG_PANEL);
-        scrollPane.getViewport().setBackground(Theme.BG_PANEL);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.getVerticalScrollBar().setUI(new bst.theme.ModernScrollBarUI());
         scrollPane.getVerticalScrollBar().setUnitIncrement(10);
+        scrollPane.getVerticalScrollBar().setOpaque(false);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        add(scrollPane, BorderLayout.CENTER);
+        container.add(scrollPane, BorderLayout.CENTER);
+
+        add(container, BorderLayout.CENTER);
 
         showPlaceholder();
     }
 
     private JPanel buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(Theme.BG_PANEL);
+        header.setOpaque(false);
         header.setBorder(new EmptyBorder(8, 16, 6, 16));
 
         JLabel title = new JLabel("Histórico");

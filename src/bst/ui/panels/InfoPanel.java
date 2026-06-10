@@ -37,28 +37,49 @@ public class InfoPanel extends JPanel implements BSTObserver {
         this.bst      = bst;
         this.analyzer = analyzer;
 
-        setPreferredSize(new Dimension(WIDTH, 0));
-        setBackground(Theme.BG_PANEL);
-        setBorder(new MatteBorder(0, 1, 0, 0, Theme.BORDER));
+        setPreferredSize(new Dimension(WIDTH + 10, 0));
+        setBackground(new Color(0, 0, 0, 0)); // Transparent background
+        setOpaque(false);
+        setBorder(new EmptyBorder(16, 0, 16, 16)); // Floating margin
         setLayout(new BorderLayout());
 
-        add(buildHeader(), BorderLayout.NORTH);
+        JPanel container = new JPanel(new BorderLayout()) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Theme.BG_PANEL);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
+                g2.setColor(Theme.BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 16, 16);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        container.setOpaque(false);
+
+        container.add(buildHeader(), BorderLayout.NORTH);
 
         JPanel content = buildContent();
         JScrollPane scroll = new JScrollPane(content);
         scroll.setBorder(null);
-        scroll.setBackground(Theme.BG_PANEL);
-        scroll.getViewport().setBackground(Theme.BG_PANEL);
+        scroll.setBackground(new Color(0, 0, 0, 0));
+        scroll.getViewport().setBackground(new Color(0, 0, 0, 0));
+        scroll.getViewport().setOpaque(false);
+        scroll.setOpaque(false);
+        scroll.getVerticalScrollBar().setUI(new bst.theme.ModernScrollBarUI());
         scroll.getVerticalScrollBar().setUnitIncrement(14);
-        scroll.getVerticalScrollBar().setBackground(Theme.BG_PANEL);
-        add(scroll, BorderLayout.CENTER);
+        scroll.getVerticalScrollBar().setBackground(new Color(0, 0, 0, 0));
+        scroll.getVerticalScrollBar().setOpaque(false);
+        container.add(scroll, BorderLayout.CENTER);
+
+        add(container, BorderLayout.CENTER);
 
         refresh();
     }
 
     private JPanel buildHeader() {
         JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(Theme.BG_PANEL);
+        p.setOpaque(false);
         p.setBorder(new CompoundBorder(
             new MatteBorder(0, 0, 1, 0, Theme.BORDER),
             new EmptyBorder(12, 16, 12, 16)
@@ -73,7 +94,7 @@ public class InfoPanel extends JPanel implements BSTObserver {
     private JPanel buildContent() {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(Theme.BG_PANEL);
+        p.setOpaque(false);
         p.setBorder(new EmptyBorder(8, 0, 16, 0));
 
         p.add(buildSection("Propriedades", this::buildPropertiesRows));

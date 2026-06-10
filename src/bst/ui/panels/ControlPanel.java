@@ -24,10 +24,27 @@ public class ControlPanel extends JPanel {
 
     public ControlPanel(BSTController controller) {
         this.controller = controller;
-        setBackground(Theme.BG_PANEL);
-        setBorder(new MatteBorder(0, 0, 1, 0, Theme.BORDER));
-        setLayout(new FlowLayout(FlowLayout.LEFT, 8, 10));
+        setOpaque(false);
+        setBorder(new EmptyBorder(10, 16, 12, 16));
+        setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));
         buildComponents();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(Theme.BG_PANEL);
+        g2.fillRect(0, 0, getWidth(), getHeight());
+        
+        // Translucent glass line at the bottom
+        g2.setColor(new Color(255, 255, 255, 10));
+        g2.drawLine(0, getHeight() - 2, getWidth(), getHeight() - 2);
+        g2.setColor(new Color(0, 0, 0, 80));
+        g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
+        
+        g2.dispose();
+        super.paintComponent(g);
     }
 
     public void setToastCallback(BiConsumer<String, String> cb)  { this.toastCallback      = cb; }

@@ -34,10 +34,23 @@ public class TreeTypeDialog extends JDialog {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Drop shadow
+                for(int i = 0; i < 15; i++) {
+                    g2.setColor(new Color(0, 0, 0, 25 - (i * 1)));
+                    g2.fillRoundRect(16 - i, 16 - i, getWidth() - 32 + (i*2), getHeight() - 32 + (i*2), 20 + i, 20 + i);
+                }
+
                 g2.setColor(Theme.BG_PANEL);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.fillRoundRect(16, 16, getWidth() - 32, getHeight() - 32, 14, 14);
+                
+                // Inner glow
+                g2.setColor(new Color(255, 255, 255, 20));
+                g2.drawRoundRect(17, 17, getWidth() - 34, getHeight() - 34, 14, 14);
+                
+                // Border
                 g2.setColor(Theme.BORDER_LIGHT);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
+                g2.drawRoundRect(16, 16, getWidth() - 33, getHeight() - 33, 14, 14);
                 g2.dispose();
             }
         };
