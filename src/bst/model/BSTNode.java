@@ -1,14 +1,5 @@
 package bst.model;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   BSTNode — Nó da Árvore Binária de Busca
- *   Representa um único nó da estrutura de dados
- * ╚══════════════════════════════════════════════════════╝
- *
- * Responsabilidade única: armazenar o valor do nó,
- * referências aos filhos e posição de layout para o renderer.
- */
 public class BSTNode {
 
     /** Valor armazenado neste nó. */

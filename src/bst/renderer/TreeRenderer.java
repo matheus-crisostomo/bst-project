@@ -8,28 +8,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   TreeRenderer — Renderizador da Árvore
- *   Desenha nós, arestas e animações no canvas
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Strategy (separa algoritmo de desenho dos componentes Swing)
- * Responsabilidade: layout, renderização e animação de transição de nós
- */
 public class TreeRenderer {
 
     private int highlightedValue  = Integer.MIN_VALUE;
     private int lastInsertedValue = Integer.MIN_VALUE;
     private boolean enableRBColors = false;
 
-    // ── Animação de Rotação (overlay arco) ───────────────────────────────────
+
     private int     rotationPivotValue = Integer.MIN_VALUE;
     private String  rotationLabel      = null;
     private float   rotationProgress   = 0f;
     private boolean rotationClockwise  = true;
 
-    // ── Animação de Transição de Posição ─────────────────────────────────────
+
     /** Posições anteriores dos nós (valor → [pixelX, pixelY]) antes da rotação. */
     private Map<Integer, int[]> previousPositions = new HashMap<>();
     /** Progresso da interpolação de posição (0.0 = posição antiga, 1.0 = posição nova). */
@@ -43,9 +34,7 @@ public class TreeRenderer {
     public void clearHighlight()              { this.highlightedValue  = Integer.MIN_VALUE; }
     public void clearLastInserted()           { this.lastInsertedValue = Integer.MIN_VALUE; }
 
-    // ── API de Animação de Rotação ───────────────────────────────────────────
 
-    /**
      * Inicia a animação de rotação no nó pivô.
      */
     public void startRotationAnimation(int pivotVal, String label, boolean clockwise) {
@@ -69,9 +58,7 @@ public class TreeRenderer {
         return rotationPivotValue != Integer.MIN_VALUE;
     }
 
-    // ── API de Transição de Posição ──────────────────────────────────────────
 
-    /**
      * Captura as posições atuais de todos os nós antes de uma rotação.
      * Deve ser chamado ANTES da árvore ser modificada.
      */
@@ -113,9 +100,7 @@ public class TreeRenderer {
         return transitionProgress < 1f && !previousPositions.isEmpty();
     }
 
-    // ── Layout ───────────────────────────────────────────────────────────────
 
-    public void assignPositions(BSTNode root) {
         int[] counter = {0};
         assignRec(root, 0, counter);
     }
@@ -139,9 +124,7 @@ public class TreeRenderer {
         return new Dimension(w, h);
     }
 
-    // ── Render ───────────────────────────────────────────────────────────────
 
-    public void render(Graphics2D g2, BSTNode root, int canvasW, int canvasH) {
         applyHints(g2);
         drawBackground(g2, canvasW, canvasH);
 
@@ -165,9 +148,7 @@ public class TreeRenderer {
         drawRotationOverlay(g2, root, ox, oy);
     }
 
-    // ── Hit test ─────────────────────────────────────────────────────────────
 
-    public int getNodeAt(BSTNode root, int mx, int my, int canvasW) {
         if (root == null) return Integer.MIN_VALUE;
         int[] off = calcOffsets(root, canvasW);
         for (BSTNode n : collectAll(root)) {
@@ -178,9 +159,7 @@ public class TreeRenderer {
         return Integer.MIN_VALUE;
     }
 
-    // ── Renderização com Interpolação ────────────────────────────────────────
 
-    private int[] interpolatedPos(BSTNode node, int ox, int oy) {
         int targetX = px(node, ox);
         int targetY = py(node, oy);
 
@@ -218,9 +197,7 @@ public class TreeRenderer {
         drawNodeAt(g2, node, node == root, pos[0], pos[1]);
     }
 
-    // ── Animação de Rotação (overlay) ────────────────────────────────────────
 
-    private void drawRotationOverlay(Graphics2D g2, BSTNode root, int ox, int oy) {
         if (rotationPivotValue == Integer.MIN_VALUE || rotationProgress <= 0f) return;
 
         BSTNode pivot = findNode(root, rotationPivotValue);
@@ -303,9 +280,7 @@ public class TreeRenderer {
         return left != null ? left : findNode(node.right, val);
     }
 
-    // ── Privados ─────────────────────────────────────────────────────────────
 
-    private void applyHints(Graphics2D g2) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,      RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING,         RenderingHints.VALUE_RENDER_QUALITY);

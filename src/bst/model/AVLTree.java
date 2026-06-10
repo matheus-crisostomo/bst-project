@@ -1,17 +1,7 @@
 package bst.model;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   AVLTree — Árvore AVL com Balanceamento Automático
- *   Estende BST mantendo a propriedade de altura balanceada
- * ╚══════════════════════════════════════════════════════╝
- *
- * Após cada inserção ou remoção, rotações são aplicadas
- * para garantir |altura(esq) − altura(dir)| ≤ 1 em todo nó.
- */
 public class AVLTree extends BST {
 
-    // ── Inserção ─────────────────────────────────────────────────────────────
 
     @Override
     public boolean insert(int val) {
@@ -31,7 +21,6 @@ public class AVLTree extends BST {
         return balance(node);
     }
 
-    // ── Remoção ──────────────────────────────────────────────────────────────
 
     @Override
     public boolean remove(int val) {
@@ -61,7 +50,6 @@ public class AVLTree extends BST {
         return balance(node);
     }
 
-    // ── Balanceamento ────────────────────────────────────────────────────────
 
     private BSTNode balance(BSTNode node) {
         int bf = balanceFactor(node);
@@ -120,7 +108,6 @@ public class AVLTree extends BST {
         return (n == null) ? 0 : height(n.left) - height(n.right);
     }
 
-    // ── Mirror ───────────────────────────────────────────────────────────────
 
     /**
      * Espelha a árvore e rebalanceia completamente via reinserção,
@@ -142,7 +129,6 @@ public class AVLTree extends BST {
         collectMirrorPreorder(node.left,  vals);
     }
 
-    // ── Utilitários ──────────────────────────────────────────────────────────
 
     private boolean contains(BSTNode node, int val) {
         if (node == null)    return false;

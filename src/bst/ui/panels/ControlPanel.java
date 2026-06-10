@@ -128,7 +128,6 @@ public class ControlPanel extends JPanel {
         toastCallback.accept("Árvore espelhada", "info");
     }
 
-    // ── Componentes ──────────────────────────────────────────────────────────
 
     private JTextField buildInputField() {
         JTextField field = new JTextField(7) {

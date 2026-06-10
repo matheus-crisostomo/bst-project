@@ -11,16 +11,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.swing.*;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   TreePanel — Canvas de Renderização da Árvore
- *   Componente Swing que exibe a BST graficamente
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Observer (BSTObserver) — redesenha automaticamente
- * quando a árvore muda. Delega toda lógica de desenho
- * ao TreeRenderer (Separation of Concerns).
- */
 public class TreePanel extends JPanel implements BSTObserver {
 
     private final BST          bst;
@@ -49,7 +39,6 @@ public class TreePanel extends JPanel implements BSTObserver {
         addMouseListener(buildMouseListener());
     }
 
-    // ── Setter de Callback ───────────────────────────────────────────────────
 
     /**
      * Define o callback acionado quando o usuário clica num nó.
@@ -70,7 +59,6 @@ public class TreePanel extends JPanel implements BSTObserver {
         this.rotationToastCallback = cb;
     }
 
-    // ── Renderização ─────────────────────────────────────────────────────────
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -94,7 +82,6 @@ public class TreePanel extends JPanel implements BSTObserver {
         renderer.render(g2, bst.root, getWidth(), getHeight());
     }
 
-    // ── Interação com Mouse ──────────────────────────────────────────────────
 
     private MouseAdapter buildMouseListener() {
         return new MouseAdapter() {
@@ -111,7 +98,6 @@ public class TreePanel extends JPanel implements BSTObserver {
         };
     }
 
-    // ── BSTObserver ──────────────────────────────────────────────────────────
 
     @Override
     public void onTreeChanged() {

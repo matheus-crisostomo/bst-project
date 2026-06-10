@@ -2,17 +2,6 @@ package bst.observer;
 
 import bst.model.RotationType;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   BSTObserver — Interface do padrão Observer
- *   Define o contrato de notificação para mudanças na BST
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Observer (GoF)
- * Qualquer componente que precise reagir a mudanças na
- * árvore deve implementar esta interface e se registrar
- * via BST.addObserver(BSTObserver).
- */
 public interface BSTObserver {
 
     /**

@@ -2,31 +2,6 @@ package bst.model;
 
 import java.util.*;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   BSTAnalyzer — Analisador Completo da BST
- *   Métricas, tipos, percursos e caminhos
- * ╚══════════════════════════════════════════════════════╝
- *
- * ┌──────────────────────────────────────────────────────┐
- *  TABELA DE REFERÊNCIA DE MÉTRICAS (DEFINIÇÕES CORRETAS)
- * ├─────────────────┬────────────────────────────────────┤
- *  NÍVEL do nó      │ Raiz = 1. Filho da raiz = 2.       │
- *                   │ Fórmula: profundidade + 1          │
- * ├─────────────────┼────────────────────────────────────┤
- *  PROFUNDIDADE nó  │ Raiz = 0. Conta ARESTAS até raiz.  │
- *                   │ Fórmula: nível - 1                 │
- * ├─────────────────┼────────────────────────────────────┤
- *  ALTURA do nó     │ Folha = 0. Conta ARESTAS até folha │
- *                   │ mais distante.                     │
- * ├─────────────────┼────────────────────────────────────┤
- *  ALTURA da árvore │ = altura da raiz.                  │
- *                   │ Árvore vazia = -1. Raiz só = 0.    │
- * ├─────────────────┼────────────────────────────────────┤
- *  TOTAL DE NÍVEIS  │ = altura da árvore + 1             │
- *                   │ Árvore vazia = 0. Raiz só = 1.     │
- * └─────────────────┴────────────────────────────────────┘
- */
 public class BSTAnalyzer {
 
     // ═════════════════════════════════════════════════════════════════════════

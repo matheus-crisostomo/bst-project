@@ -10,29 +10,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   TreeFileWriter — Serializador e Escritor de Arquivos
- *   Salva a árvore em TXT no formato Parênteses Aninhados
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Service (sem estado)
- *
- * Formato Parênteses Aninhados (Nested Parentheses):
- *   Árvore vazia        → ()
- *   Nó sem filhos       → (valor () ())
- *   Nó com filhos       → (valor (subárvore_esq) (subárvore_dir))
- *
- * Exemplo para árvore com raiz 50, filhos 30 e 70:
- *   (50 (30 () ()) (70 () ()))
- *
- * O arquivo gerado contém:
- *   • Representação em Parênteses Aninhados
- *   • Estatísticas completas (nós, altura, profundidade, níveis)
- *   • Tipos da árvore (Cheia, Completa, Perfeita, Balanceada, Degenerada)
- *   • Todos os percursos (In-Order, Pre-Order, Post-Order, Level-Order)
- *   • Todos os caminhos Raiz → Folha
- */
 public class TreeFileWriter {
 
     private final BSTAnalyzer analyzer;
@@ -105,7 +82,6 @@ public class TreeFileWriter {
         if (bst instanceof AVLTree) treeTypeStr = "Árvore AVL";
         else if (bst instanceof RedBlackTree) treeTypeStr = "Árvore Rubro-Negra";
 
-        // ── Cabeçalho ────────────────────────────────────────
         sb.append("╔").append("═".repeat(50)).append("╗\n");
         sb.append(String.format("║   %-46s ║%n", treeTypeStr.toUpperCase()));
         sb.append("║   Formato: Parênteses Aninhados                 ║\n");
@@ -120,7 +96,6 @@ public class TreeFileWriter {
             return sb.toString();
         }
 
-        // ── Histórico de Operações ───────────────────────────
         sb.append(sep).append("\n");
         sb.append("  HISTÓRICO DE OPERAÇÕES E ROTAÇÕES\n");
         sb.append(sep2).append("\n");
@@ -140,13 +115,11 @@ public class TreeFileWriter {
             sb.append("\n");
         }
 
-        // ── 1. Parênteses Aninhados — compacto ───────────────
         sb.append(sep).append("\n");
         sb.append("  1. PARÊNTESES ANINHADOS (Compacto)\n");
         sb.append(sep2).append("\n");
         sb.append("  ").append(toNestedParentheses(root)).append("\n\n");
 
-        // ── 2. Parênteses Aninhados — indentado ──────────────
         sb.append(sep).append("\n");
         sb.append("  2. PARÊNTESES ANINHADOS (Indentado)\n");
         sb.append(sep2).append("\n");
@@ -156,7 +129,6 @@ public class TreeFileWriter {
         }
         sb.append("\n");
 
-        // ── 3. Estatísticas ───────────────────────────────────
         sb.append(sep).append("\n");
         sb.append("  3. ESTATÍSTICAS\n");
         sb.append(sep2).append("\n");
@@ -171,7 +143,6 @@ public class TreeFileWriter {
           .append(String.join(", ", analyzer.getTreeTypes(root)))
           .append("\n\n");
 
-        // ── 4. Tipos detalhados ───────────────────────────────
         sb.append(sep).append("\n");
         sb.append("  4. TIPOS DA ÁRVORE\n");
         sb.append(sep2).append("\n");
@@ -182,7 +153,6 @@ public class TreeFileWriter {
         sb.append(typeRow("Degenerada (Degenerate)",analyzer.isDegenerate(root)));
         sb.append("\n");
 
-        // ── 5. Percursos ──────────────────────────────────────
         sb.append(sep).append("\n");
         sb.append("  5. PERCURSOS\n");
         sb.append(sep2).append("\n");
@@ -195,7 +165,6 @@ public class TreeFileWriter {
         sb.append("  Level-Order (Por Nível BFS):  ")
           .append(joinArrow(bst.levelorder())).append("\n\n");
 
-        // ── 6. Caminhos Raiz → Folha ──────────────────────────
         sb.append(sep).append("\n");
         sb.append("  6. CAMINHOS RAIZ → FOLHA\n");
         sb.append(sep2).append("\n");
@@ -205,7 +174,6 @@ public class TreeFileWriter {
         }
         sb.append("\n");
 
-        // ── 7. Detalhes por nó ────────────────────────────────
         sb.append(sep).append("\n");
         sb.append("  7. DETALHES DE CADA NÓ (In-Order)\n");
         sb.append(sep2).append("\n");
@@ -223,7 +191,6 @@ public class TreeFileWriter {
         }
         sb.append("\n");
 
-        // ── 8. Comparativo com outras Estruturas ──────────────
         sb.append(sep).append("\n");
         sb.append("  8. COMPARAÇÃO COM OUTRAS ESTRUTURAS\n");
         sb.append("  Aplicando a mesma sequência de inserções/remoções\n");

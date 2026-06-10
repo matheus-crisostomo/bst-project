@@ -6,28 +6,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.*;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   TreeFileReader — Leitor de Arquivo TXT
- *   Reconstrói a BST a partir do formato Parênteses Aninhados
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Service (sem estado)
- *
- * O arquivo pode ser qualquer TXT que contenha uma linha com
- * o formato de Parênteses Aninhados compacto, por exemplo:
- *
- *   (50 (30 (20 () ()) (40 () ())) (70 (60 () ()) (80 () ())))
- *
- * O leitor:
- *   1. Varre o arquivo linha por linha
- *   2. Detecta a primeira linha que corresponde ao padrão
- *   3. Faz o parse recursivo da expressão
- *   4. Insere os valores na BST preservando a estrutura original
- *      (inserção por pré-ordem para recriar a mesma árvore)
- *
- * Erros de parse lançam {@link ParseException} com mensagem descritiva.
- */
 public class TreeFileReader {
 
     // ═════════════════════════════════════════════════════════════════════════

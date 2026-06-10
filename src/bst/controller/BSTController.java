@@ -3,19 +3,6 @@ package bst.controller;
 import bst.model.BST;
 import bst.observer.BSTObserver;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   BSTController — Controlador da Árvore
- *   Medeia as operações entre a UI e o modelo BST
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Controller (MVC) + Mediator (GoF)
- * Responsabilidades:
- * - Validar entradas vindas da UI antes de tocar o modelo
- * - Converter strings da UI em inteiros com tratamento de erro
- * - Delegar operações ao BST e retornar resultados tipados
- * - Registrar/remover observadores no BST
- */
 public class BSTController {
 
     private final BST bst;
@@ -24,7 +11,6 @@ public class BSTController {
         this.bst = bst;
     }
 
-    // ── Gerenciamento de Observadores ────────────────────────────────────────
 
     public void addObserver(BSTObserver observer) {
         bst.addObserver(observer);
@@ -34,7 +20,6 @@ public class BSTController {
         bst.removeObserver(observer);
     }
 
-    // ── Operações com Resultado Tipado ───────────────────────────────────────
 
     /**
      * Valida e executa a inserção de um valor.

@@ -3,17 +3,6 @@ package bst.model;
 import bst.observer.BSTObserver;
 import java.util.*;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   BST — Árvore Binária de Busca
- *   Estrutura de dados principal do sistema
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Observable (Observer GoF)
- * Contém toda a lógica da BST: inserção, remoção,
- * percursos e estatísticas. Notifica observadores
- * registrados em cada operação mutável.
- */
 public class BST {
 
     /** Raiz da árvore. */
@@ -41,7 +30,6 @@ public class BST {
         operationHistory.add(currentOp);
     }
 
-    // ── Gerenciamento de Observadores ────────────────────────────────────────
 
     public void addObserver(BSTObserver observer) {
         observers.add(observer);
@@ -61,7 +49,6 @@ public class BST {
         observers.forEach(o -> o.onRotation(type, pivotVal));
     }
 
-    // ── Operações Mutáveis ───────────────────────────────────────────────────
 
     /**
      * Insere um valor na BST seguindo as regras de ordenação.
@@ -185,7 +172,6 @@ public class BST {
         mirror(node.right);
     }
 
-    // ── Estatísticas ─────────────────────────────────────────────────────────
 
     /** Retorna o número total de nós. */
     public int size() { return size(root); }
@@ -204,7 +190,6 @@ public class BST {
         return (n == null) ? -1 : 1 + Math.max(height(n.left), height(n.right));
     }
 
-    // ── Percursos ────────────────────────────────────────────────────────────
 
     /** In-Order: Esquerda → Raiz → Direita (resultado ordenado). */
     public List<Integer> inorder() {

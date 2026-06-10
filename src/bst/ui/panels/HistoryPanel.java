@@ -10,16 +10,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   HistoryPanel — Painel de Histórico de Operações
- *   Exibe log das inserções, remoções e rotações realizadas
- * ╚══════════════════════════════════════════════════════╝
- *
- * Padrão: Observer (GoF)
- * Responsabilidade: manter e exibir o histórico de todas as
- * operações mutáveis realizadas na árvore, incluindo rotações AVL.
- */
 public class HistoryPanel extends JPanel implements BSTObserver {
 
     private static final int MAX_ENTRIES = 200;
@@ -101,7 +91,6 @@ public class HistoryPanel extends JPanel implements BSTObserver {
         return header;
     }
 
-    // ── Observer ──────────────────────────────────────────────────────────────
 
     @Override
     public void onNodeInserted(int val) {
@@ -123,7 +112,6 @@ public class HistoryPanel extends JPanel implements BSTObserver {
         SwingUtilities.invokeLater(this::flushPending);
     }
 
-    // ── Lógica de Histórico ──────────────────────────────────────────────────
 
     private void flushPending() {
         if (pendingOperation == null) {

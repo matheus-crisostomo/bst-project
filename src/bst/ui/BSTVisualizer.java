@@ -138,7 +138,6 @@ public class BSTVisualizer extends JFrame {
         controller.addObserver(historyPanel);
     }
 
-    // ── Save / Load ───────────────────────────────────────────────────────────
 
     private void doSave() {
         if (bst.root == null) { showToast("Árvore vazia — nada para salvar", "error"); return; }
@@ -199,7 +198,6 @@ public class BSTVisualizer extends JFrame {
         }
     }
 
-    // ── Toast ─────────────────────────────────────────────────────────────────
 
     private void buildToast() {
         toastLabel = new JLabel("", SwingConstants.CENTER) {

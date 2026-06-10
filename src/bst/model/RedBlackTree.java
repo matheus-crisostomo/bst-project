@@ -1,21 +1,10 @@
 package bst.model;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   RedBlackTree — Árvore Rubro-Negra (LLRB)
- *   Estende BST mantendo balanceamento através de cores
- * ╚══════════════════════════════════════════════════════╝
- *
- * Implementação baseada na Left-Leaning Red-Black Tree (LLRB)
- * proposta por Robert Sedgewick. Utiliza rotações e inversões de 
- * cores para garantir altura O(log N).
- */
 public class RedBlackTree extends BST {
 
     private static final boolean RED   = true;
     private static final boolean BLACK = false;
 
-    // ── Inserção ─────────────────────────────────────────────────────────────
 
     @Override
     public boolean insert(int val) {
@@ -37,7 +26,6 @@ public class RedBlackTree extends BST {
         return balance(h);
     }
 
-    // ── Remoção ──────────────────────────────────────────────────────────────
 
     @Override
     public boolean remove(int val) {
@@ -95,7 +83,6 @@ public class RedBlackTree extends BST {
         return balance(h);
     }
 
-    // ── Balanceamento e Rotações ─────────────────────────────────────────────
 
     private BSTNode balance(BSTNode h) {
         if (isRed(h.right) && !isRed(h.left))      h = rotateLeft(h);
@@ -154,7 +141,6 @@ public class RedBlackTree extends BST {
         return h;
     }
 
-    // ── Mirror ───────────────────────────────────────────────────────────────
 
     /**
      * Espelha a árvore e rebalanceia completamente via reinserção,
@@ -176,7 +162,6 @@ public class RedBlackTree extends BST {
         collectMirrorPreorder(node.left,  vals);
     }
 
-    // ── Utilitários ──────────────────────────────────────────────────────────
 
     private boolean contains(BSTNode node, int val) {
         if (node == null)    return false;

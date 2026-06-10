@@ -87,7 +87,6 @@ public class InfoPanel extends JPanel implements BSTObserver {
         return p;
     }
 
-    // ── Seções ───────────────────────────────────────────────────────────────
 
     private JPanel buildSection(String title, Runnable rowBuilder) {
         JPanel sec = new JPanel();
@@ -205,7 +204,6 @@ public class InfoPanel extends JPanel implements BSTObserver {
         currentCard.add(Box.createVerticalStrut(6));
     }
 
-    // ── Refresh ───────────────────────────────────────────────────────────────
 
     public void refresh() {
         BSTNode root = bst.root;
@@ -287,14 +285,12 @@ public class InfoPanel extends JPanel implements BSTObserver {
         taAllPaths.setCaretPosition(0);
     }
 
-    // ── API Pública ───────────────────────────────────────────────────────────
 
     public void setSelectedNode(int val) {
         this.selectedNodeVal = val;
         SwingUtilities.invokeLater(this::refreshSelectedNode);
     }
 
-    // ── Observer ──────────────────────────────────────────────────────────────
 
     @Override public void onTreeChanged()       { SwingUtilities.invokeLater(this::refresh); }
     @Override public void onNodeInserted(int v) {}
@@ -303,7 +299,6 @@ public class InfoPanel extends JPanel implements BSTObserver {
         SwingUtilities.invokeLater(this::refresh);
     }
 
-    // ── Helpers de construção ─────────────────────────────────────────────────
 
     private JLabel cardRow(String key, String value) {
         JPanel row = new JPanel(new BorderLayout(6, 0));

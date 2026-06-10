@@ -2,26 +2,6 @@ import bst.ui.BSTVisualizer;
 import bst.ui.TreeTypeDialog;
 import javax.swing.*;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   Main — Ponto de Entrada do Sistema
- *   Árvore Binária de Busca — Visualizador Gráfico
- * ╚══════════════════════════════════════════════════════╝
- *
- * Como compilar e executar:
- *
- *   Linux / macOS:
- *     chmod +x compile.sh run.sh
- *     ./compile.sh && ./run.sh
- *
- *   Windows:
- *     compile.bat
- *     run.bat
- *
- *   Manualmente:
- *     javac -d out $(find src -name "*.java")  [Linux/macOS]
- *     java  -cp out Main
- */
 public class Main {
 
     public static void main(String[] args) {

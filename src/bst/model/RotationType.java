@@ -1,13 +1,5 @@
 package bst.model;
 
-/**
- * ╔══════════════════════════════════════════════════════╗
- *   RotationType — Tipos de Rotação AVL
- *   Enum que identifica as rotações realizadas no balanceamento
- * ╚══════════════════════════════════════════════════════╝
- *
- * Responsabilidade: representar os quatro casos de rotação AVL
- */
 public enum RotationType {
 
     LEFT_LEFT("Rotação Simples à Direita", "RSD"),
